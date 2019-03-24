@@ -7,6 +7,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 
+import api from '../../services/api';
+
 export default class Register extends Component {
   state = {
     name: '',
@@ -46,8 +48,9 @@ export default class Register extends Component {
       userType: event.target.value
     });
   }
-
+  
   submit = event => {
+    event.preventDefault();
     const { history } = this.props;
 
     if (this.state.password !== this.state.passwordConf) {
@@ -58,11 +61,18 @@ export default class Register extends Component {
       this.setState({
         passwordMismatch: false
       });
-      // MANDAR OS DADOS PRO SERVIDOR
-      history.push('/login');
-    }
 
-    event.preventDefault();
+      const user = {
+        name: this.state.name,
+        email: this.state.email,
+        password: this.state.password,
+        userType: this.state.userType
+      };
+
+      api.post('/user/create', user).then(() => {
+        history.push('/login');
+      });
+    }
   }
 
   render() {

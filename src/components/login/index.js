@@ -7,29 +7,52 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
+
+import api from '../../services/api';
+import { userService } from '../../services/user.service';
 
 export default class Login extends Component {
   state = {
-    email: null,
-    password: null
-  }
+    email: '',
+    password: '',
+    wrongCombination: false 
+  };
 
-  emailChange(event) {
+  emailChange = event => {
     this.setState({
       email: event.target.value
     });
   }
 
-  passwordChange(event) {
+  passwordChange = event => {
     this.setState({
       password: event.target.value
     });
   }
 
   submit = event => {
-    console.log(event, this.state);
+    event.preventDefault();
+    const { history } = this.props;
+    const login = {
+      email: this.state.email,
+      password: this.state.password
+    };
 
-    return false;
+    api.post('/user/login', login).then(res => {
+      this.setState({
+        wrongCombination: false
+      });
+
+      userService.setData(res.data);
+      history.push('/main');
+    }).catch(err => {
+      if (err.response.status === 404) {
+        this.setState({
+          wrongCombination: true
+        });
+      }
+    });
   }
 
   render() {
@@ -45,13 +68,18 @@ export default class Login extends Component {
               <Form onSubmit={this.submit}>
                 <Form.Group>
                   <Form.Label>E-mail</Form.Label>
-                  <Form.Control type="email" required/>
+                  <Form.Control type="email" name="email" value={this.state.email} onChange={this.emailChange} required/>
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>Senha</Form.Label>
-                  <Form.Control type="password" required/>
+                  <Form.Control type="password" name="password" value={this.state.password} onChange={this.passwordChange} required/>
                 </Form.Group>
+
+                {
+                  this.state.wrongCombination &&
+                    <Alert variant="danger">E-mail ou senha incorretos!</Alert>
+                }
 
                 <Button type="submit" variant="primary" block>
                   Entrar

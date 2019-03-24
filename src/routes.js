@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 import Login from './components/login';
-import Register from './components/login/register';
+import Register from './components/register';
 
 const Routes = () => (
   <BrowserRouter>
