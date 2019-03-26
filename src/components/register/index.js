@@ -63,10 +63,10 @@ export default class Register extends Component {
       });
 
       const user = {
-        name: this.state.name,
-        email: this.state.email,
-        password: this.state.password,
-        userType: this.state.userType
+        nm_person: this.state.name,
+        ds_email: this.state.email,
+        ds_password: this.state.password,
+        cn_user_type: this.state.userType
       };
 
       api.post('/user/create', user).then(() => {
