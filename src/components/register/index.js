@@ -19,34 +19,10 @@ export default class Register extends Component {
     passwordMismatch: false
   }
 
-  nameChange = event => {
+  handleChange = event => {
     this.setState({
-      name: event.target.value
-    });
-  }
-
-  emailChange = event => {
-    this.setState({
-      email: event.target.value
-    });
-  }
-
-  passwordChange = event => {
-    this.setState({
-      password: event.target.value
-    });
-  }
-
-  passwordConfChange = event => {
-    this.setState({
-      passwordConf: event.target.value
-    });
-  }
-
-  userTypeChange = event => {
-    this.setState({
-      userType: event.target.value
-    });
+      [event.target.name]: event.target.value
+    })
   }
   
   submit = event => {
@@ -88,22 +64,22 @@ export default class Register extends Component {
               <Form onSubmit={this.submit}>
                 <Form.Group>
                   <Form.Label>Nome</Form.Label>
-                  <Form.Control type="text" required value={this.state.name} onChange={this.nameChange} />
+                  <Form.Control type="text" name="name" required value={this.state.name} onChange={this.handleChange} />
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>E-mail</Form.Label>
-                  <Form.Control type="email" required value={this.state.email} onChange={this.emailChange} />
+                  <Form.Control type="email" name="email" required value={this.state.email} onChange={this.handleChange} />
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>Senha</Form.Label>
-                  <Form.Control type="password" required value={this.state.password} onChange={this.passwordChange} />
+                  <Form.Control type="password" name="password" required value={this.state.password} onChange={this.handleChange} />
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>Confirmação de senha</Form.Label>
-                  <Form.Control type="password" required value={this.state.passwordConf} onChange={this.passwordConfChange} />
+                  <Form.Control type="password" name="passwordConf" required value={this.state.passwordConf} onChange={this.handleChange} />
                 </Form.Group>
 
                 {
@@ -117,20 +93,20 @@ export default class Register extends Component {
                     required
                     type="radio"
                     id="ut1"
-                    name="user-type"
+                    name="userType"
                     label="Nutricionista"
                     value="NUT"
-                    onClick={this.userTypeChange} />
+                    onClick={this.handleChange} />
 
                   <Form.Check
                     custom
                     required
                     type="radio"
                     id="ut2"
-                    name="user-type"
+                    name="userType"
                     label="Paciente"
                     value="PAC"
-                    onClick={this.userTypeChange} />
+                    onClick={this.handleChange} />
                 </Form.Group>
 
                 <Button type="submit" variant="primary" block>
