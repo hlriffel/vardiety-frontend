@@ -19,16 +19,10 @@ export default class Login extends Component {
     wrongCombination: false 
   };
 
-  emailChange = event => {
+  handleChange = event => {
     this.setState({
-      email: event.target.value
-    });
-  }
-
-  passwordChange = event => {
-    this.setState({
-      password: event.target.value
-    });
+      [event.target.name]: event.target.value
+    })
   }
 
   submit = event => {
@@ -68,12 +62,12 @@ export default class Login extends Component {
               <Form onSubmit={this.submit}>
                 <Form.Group>
                   <Form.Label>E-mail</Form.Label>
-                  <Form.Control type="email" name="email" value={this.state.email} onChange={this.emailChange} required/>
+                  <Form.Control type="email" name="email" value={this.state.email} onChange={this.handleChange} required/>
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>Senha</Form.Label>
-                  <Form.Control type="password" name="password" value={this.state.password} onChange={this.passwordChange} required/>
+                  <Form.Control type="password" name="password" value={this.state.password} onChange={this.handleChange} required/>
                 </Form.Group>
 
                 {
