@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -7,73 +8,24 @@ import Button from 'react-bootstrap/Button';
 
 import Meal from '../../../../components/meal';
 
-export default class Diet extends Component {
-  state = {
-    meals: [
-      {
-        id: null,
-        name: 'Café',
-        items: [
-          {
-            id: null,
-            description: '',
-            amount: ''
-          }
-        ],
-        internalId: 1
-      },
-      {
-        id: null,
-        name: 'Almoço',
-        items: [
-          {
-            id: null,
-            description: '',
-            amount: ''
-          }
-        ],
-        internalId: 2
-      },
-      {
-        id: null,
-        name: 'Janta',
-        items: [
-          {
-            id: null,
-            description: 'Lasanha',
-            amount: ''
-          }
-        ],
-        internalId: 3
-      }
-    ]
-  };
+import { addMeal } from '../../../../redux/actions/initial-diet';
 
-  handleMealChange = (meal, index) => {
-    const state = {
-      ...this.state
-    };
-
-    state.meals[index] = meal;
-
-    this.setState(state);
+const mapStateToProps = state => {
+  return {
+    meals: state.initialDiet.meals
   }
+};
 
-  handleMealRemoval = mealIndex => {
-    const state = {
-      ...this.state
-    };
-
-    state.meals.splice(mealIndex, 1);
-
-    this.setState(state);
+const mapDispatchToProps = dispatch => {
+  return {
+    addMeal: (index, item) => dispatch(addMeal(index, item))
   }
+};
+
+class Diet extends Component {
 
   handleMealAddition = index => {
-    const state = {
-      ...this.state
-    };
-    const internalId = Math.max(...state.meals.map(m => m.internalId));
+    const internalId = Math.max(...this.props.meals.map(m => m.internalId));
     const newMeal = {
       id: null,
       name: 'Nova refeição',
@@ -86,10 +38,9 @@ export default class Diet extends Component {
       ],
       internalId: internalId + 1
     };
+    const mealIndex = index === undefined ? 0 : index + 1;
 
-    state.meals.splice(index + 1, 0, newMeal);
-
-    this.setState(state);
+    this.props.addMeal(mealIndex, newMeal);
   }
 
   renderAddMealButton = index => (
@@ -106,21 +57,18 @@ export default class Diet extends Component {
 
   render() {
     return (
-      <div id="initial-diet-diet" className="mt-5">
+      <div id="initial-diet-diet" className="mt-3">
         <Container>
           {
-            !this.state.meals.length &&
+            !this.props.meals.length &&
             this.renderAddMealButton()
           }
 
           {
-            this.state.meals.map((meal, index) => (
+            this.props.meals.map((meal, index) => (
               <div key={meal.internalId}>
                 <Meal
-                  meal={meal}
-                  mealIndex={index}
-                  onChangeMeal={this.handleMealChange}
-                  onRemoveMeal={this.handleMealRemoval} />
+                  mealIndex={index} />
 
                 {
                   this.renderAddMealButton(index)
@@ -133,3 +81,5 @@ export default class Diet extends Component {
     )
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Diet);

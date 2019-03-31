@@ -1,36 +1,36 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-export default class MealItem extends Component {
-  state = {
-    id: null,
-    description: '',
-    amount: ''
-  }
+import { changeMealItem, removeMealItem } from '../../../redux/actions/initial-diet';
 
-  componentDidMount() {
-    const { id, description, amount } = this.props.item;
-
-    this.setState({
-      id,
-      description,
-      amount
-    });
+const mapStateToProps = (state, props) => {
+  return {
+    item: state.initialDiet.meals[props.mealIndex].items[props.itemIndex]
   }
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    changeMealItem: (mealIndex, itemIndex, item) => dispatch(changeMealItem(mealIndex, itemIndex, item)),
+    removeMealItem: (mealIndex, itemIndex) => dispatch(removeMealItem(mealIndex, itemIndex))
+  }
+};
+
+class MealItem extends Component {
 
   handleChange = event => {
-    this.setState({
+    this.props.changeMealItem(this.props.mealIndex, this.props.itemIndex, {
+      ...this.props.item,
       [event.target.name]: event.target.value
-    }, () => {
-      this.props.onChangeItem && this.props.onChangeItem({ ...this.state }, this.props.itemIndex);
     });
   }
 
   handleRemoval = () => {
-    this.props.onRemoveItem && this.props.onRemoveItem(this.props.itemIndex);
+    this.props.removeMealItem(this.props.mealIndex, this.props.itemIndex);
   }
 
   render() {
@@ -41,7 +41,7 @@ export default class MealItem extends Component {
             <Form.Control
               type="text"
               name="description"
-              value={this.state.description}
+              value={this.props.item.description}
               placeholder="Componente"
               onChange={this.handleChange} />
           </Form.Group>
@@ -50,7 +50,7 @@ export default class MealItem extends Component {
             <Form.Control
               type="number"
               name="amount"
-              value={this.state.amount}
+              value={this.props.item.amount}
               placeholder="Gramas"
               onChange={this.handleChange} />
           </Form.Group>
@@ -67,3 +67,5 @@ export default class MealItem extends Component {
     )
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(MealItem);
