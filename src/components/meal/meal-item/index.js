@@ -1,36 +1,67 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-export default class MealItem extends Component {
-  state = {
-    id: null,
-    description: '',
-    amount: ''
+import Select from 'react-select';
+
+import { changeMealItem, removeMealItem } from '../../../redux/actions/initial-diet';
+import { fetchAllComponents } from '../../../redux/actions/components';
+
+const mapStateToProps = (state, props) => {
+  return {
+    item: state.initialDiet.meals[props.mealIndex].items[props.itemIndex],
+    components: state.components
   }
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    changeMealItem: payload => dispatch(changeMealItem(payload)),
+    removeMealItem: payload => dispatch(removeMealItem(payload)),
+    fetchAllComponents: () => dispatch(fetchAllComponents())
+  }
+};
+
+class MealItem extends Component {
 
   componentDidMount() {
-    const { id, description, amount } = this.props.item;
-
-    this.setState({
-      id,
-      description,
-      amount
-    });
+    if (!this.props.components.items.length) {
+      this.props.fetchAllComponents();
+    }
   }
 
-  handleChange = event => {
-    this.setState({
-      [event.target.name]: event.target.value
-    }, () => {
-      this.props.onChangeItem && this.props.onChangeItem({ ...this.state }, this.props.itemIndex);
+  handleChange = (event, meta) => {
+    let newItem;
+
+    if (!meta) {
+      newItem = {
+        [event.target.name]: event.target.value
+      };
+    } else {
+      newItem = {
+        id: event.value,
+        description: event.label
+      }
+    }
+
+    this.props.changeMealItem({
+      mealIndex: this.props.mealIndex,
+      itemIndex: this.props.itemIndex,
+      item: {
+        ...this.props.item,
+        ...newItem
+      }
     });
   }
 
   handleRemoval = () => {
-    this.props.onRemoveItem && this.props.onRemoveItem(this.props.itemIndex);
+    this.props.removeMealItem({
+      mealIndex: this.props.mealIndex,
+      itemIndex: this.props.itemIndex
+    });
   }
 
   render() {
@@ -38,11 +69,13 @@ export default class MealItem extends Component {
       <Form>
         <Form.Row>
           <Form.Group as={Col} lg="9">
-            <Form.Control
-              type="text"
-              name="description"
-              value={this.state.description}
+            <Select
+              name="id"
               placeholder="Componente"
+              isSearchable
+              isLoading={this.props.components.loading}
+              options={this.props.components.items}
+              defaultInputValue={this.props.item.description}
               onChange={this.handleChange} />
           </Form.Group>
 
@@ -50,7 +83,7 @@ export default class MealItem extends Component {
             <Form.Control
               type="number"
               name="amount"
-              value={this.state.amount}
+              value={this.props.item.amount}
               placeholder="Gramas"
               onChange={this.handleChange} />
           </Form.Group>
@@ -67,3 +100,5 @@ export default class MealItem extends Component {
     )
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(MealItem);
