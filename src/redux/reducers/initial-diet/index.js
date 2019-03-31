@@ -34,7 +34,7 @@ const initialState = {
       items: [
         {
           id: null,
-          description: 'Lasanha',
+          description: '',
           amount: ''
         }
       ],
@@ -44,29 +44,31 @@ const initialState = {
 };
 
 const initialDietReducer = (state = initialState, action) => {
+  const payload = action.payload;
+
   if (action.type === ActionTypes.ADD_MEAL) {
     return produce(state, draft => {
-      draft.meals.splice(action.index, 0, action.item);
+      draft.meals.splice(payload.index, 0, payload.item);
     });
   } else if (action.type === ActionTypes.CHANGE_MEAL) {
     return produce(state, draft => {
-      draft.meals[action.index] = action.item;
+      draft.meals[payload.index] = payload.item;
     });
   } else if (action.type === ActionTypes.REMOVE_MEAL) {
     return produce(state, draft => {
-      draft.meals.splice(action.index, 1);
+      draft.meals.splice(payload.index, 1);
     });
   } else if (action.type === ActionTypes.ADD_MEAL_ITEM) {
     return produce(state, draft => {
-      draft.meals[action.index].items.push(action.item);
+      draft.meals[payload.index].items.push(payload.item);
     });
   } else if (action.type === ActionTypes.CHANGE_MEAL_ITEM) {
     return produce(state, draft => {
-      draft.meals[action.mealIndex].items[action.itemIndex] = action.item;
+      draft.meals[payload.mealIndex].items[payload.itemIndex] = payload.item;
     });
   } else if (action.type === ActionTypes.REMOVE_MEAL_ITEM) {
     return produce(state, draft => {
-      draft.meals[action.mealIndex].items.splice(action.itemIndex, 1);
+      draft.meals[payload.mealIndex].items.splice(payload.itemIndex, 1);
     });
   }
 

@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import Select from 'react-select';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 
-export default class Periods extends Component {
+const mapStateToProps = state => {
+  return {
+    meals: state.initialDiet.meals
+  }
+};
+
+class Periods extends Component {
   state = {
-
+    period: null,
+    weekDays: null
   }
 
   periodOptions = [
@@ -26,6 +35,32 @@ export default class Periods extends Component {
     { value: 'DOM', label: 'Domingo' }
   ]
 
+  handlePeriodChange = event => {
+    this.setState({
+      period: event.value
+    });
+  }
+
+  handleWeekDaysChange = values => {
+    this.setState({
+      weekDays: values
+    });
+  }
+
+  handleGenerateCalendar = () => {
+    const params = {
+      meals: this.props.meals,
+      periods: {
+        period: this.state.period,
+        weekDays: [
+          ...this.state.weekDays.map(w => w.value)
+        ]
+      }
+    };
+
+    console.log(params);
+  }
+
   render() {
     return (
       <div id="initial-diet-periods" className="mt-3">
@@ -37,19 +72,33 @@ export default class Periods extends Component {
                   <Form.Label>Período</Form.Label>
                   <Select
                     isClearable
+                    name="period"
+                    placeholder="Período"
                     options={this.periodOptions}
-                    placeholder="Período" />
+                    onChange={this.handlePeriodChange} />
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>Dias da semana</Form.Label>
                   <Select
                     isMulti
+                    closeMenuOnSelect={false}
+                    name="weekDays"
+                    placeholder="Dias da semana"
                     options={this.weekDayOptions}
-                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                    placeholder="Dias da semana" />
+                    onChange={this.handleWeekDaysChange} />
                 </Form.Group>
               </Form>
+            </Col>
+          </Row>
+
+          <Row className="mt-5 d-flex justify-content-center">
+            <Col md={8} className="d-flex justify-content-end">
+              <Button
+                variant="primary"
+                onClick={this.handleGenerateCalendar}>
+                Gerar calendário
+              </Button>
             </Col>
           </Row>
         </Container>
@@ -57,3 +106,5 @@ export default class Periods extends Component {
     )
   }
 }
+
+export default connect(mapStateToProps, null)(Periods);

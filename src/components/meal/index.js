@@ -18,9 +18,9 @@ const mapStateToProps = (store, props) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    changeMeal: (index, item) => dispatch(changeMeal(index, item)),
-    removeMeal: index => dispatch(removeMeal(index)),
-    addMealItem: (index, item) => dispatch(addMealItem(index, item))
+    changeMeal: payload => dispatch(changeMeal(payload)),
+    removeMeal: payload => dispatch(removeMeal(payload)),
+    addMealItem: payload => dispatch(addMealItem(payload))
   }
 };
 
@@ -31,21 +31,29 @@ class Meal extends Component {
   }
 
   handleMealNameChange = event => {
-    this.props.changeMeal(this.props.mealIndex, {
-      ...this.props.meal,
-      [event.target.name]: event.target.value
+    this.props.changeMeal({
+      index: this.props.mealIndex,
+      item: {
+        ...this.props.meal,
+        [event.target.name]: event.target.value
+      }
     });
   }
 
   handleMealRemoval = () => {
-    this.props.removeMeal(this.props.mealIndex);
+    this.props.removeMeal({
+      index: this.props.mealIndex
+    });
   }
 
   handleItemAddition = () => {
-    this.props.addMealItem(this.props.mealIndex, {
-      id: null,
-      description: '',
-      amount: ''
+    this.props.addMealItem({
+      index: this.props.mealIndex,
+      item: {
+        id: null,
+        description: '',
+        amount: ''
+      }
     });
   }
 

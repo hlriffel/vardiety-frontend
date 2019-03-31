@@ -18,7 +18,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addMeal: (index, item) => dispatch(addMeal(index, item))
+    addMeal: payload => dispatch(addMeal(payload))
   }
 };
 
@@ -40,7 +40,11 @@ class Diet extends Component {
     };
     const mealIndex = index === undefined ? 0 : index + 1;
 
-    this.props.addMeal(mealIndex, newMeal);
+    this.props.addMeal({ index: mealIndex, item: newMeal });
+  }
+
+  handleNextClick = () => {
+    this.props.history.push('/main/initial-diet/periods');
   }
 
   renderAddMealButton = index => (
@@ -76,6 +80,16 @@ class Diet extends Component {
               </div>
             ))
           }
+
+          <Row className="mt-5 d-flex justify-content-center">
+            <Col md={8} className="d-flex justify-content-end">
+              <Button
+                variant="primary"
+                onClick={this.handleNextClick}>
+                Prosseguir
+              </Button>
+            </Col>
+          </Row>
         </Container>
       </div>
     )

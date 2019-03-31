@@ -1,25 +1,25 @@
 import * as ActionTypes from './action-types.constants';
 
-export function addMeal(index, item) {
-  return { type: ActionTypes.ADD_MEAL, index, item };
+export const addMeal = payload => {
+  return { type: ActionTypes.ADD_MEAL, payload };
 }
 
-export function changeMeal(index, item) {
-  return { type: ActionTypes.CHANGE_MEAL, index, item };
+export const changeMeal = payload => {
+  return { type: ActionTypes.CHANGE_MEAL, payload };
 }
 
-export function removeMeal(index) {
-  return { type: ActionTypes.REMOVE_MEAL, index };
+export const removeMeal = payload => {
+  return { type: ActionTypes.REMOVE_MEAL, payload };
 }
 
-export function addMealItem(index, item) {
-  return { type: ActionTypes.ADD_MEAL_ITEM, index, item };
+export const addMealItem = payload => {
+  return { type: ActionTypes.ADD_MEAL_ITEM, payload };
 }
 
-export function changeMealItem(mealIndex, itemIndex, item) {
-  return { type: ActionTypes.CHANGE_MEAL_ITEM, mealIndex, itemIndex, item };
+export const changeMealItem = payload => {
+  return { type: ActionTypes.CHANGE_MEAL_ITEM, payload };
 }
 
-export function removeMealItem(mealIndex, itemIndex) {
-  return { type: ActionTypes.REMOVE_MEAL_ITEM, mealIndex, itemIndex };
+export const removeMealItem = payload => {
+  return { type: ActionTypes.REMOVE_MEAL_ITEM, payload };
 }
