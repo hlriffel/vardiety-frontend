@@ -1,4 +1,5 @@
 class UserService {
+
   id = null;
   name = null;
   email = null;
@@ -10,6 +11,14 @@ class UserService {
     this.email = userData.email;
     this.userType = userData.userType;
   }
+
+  getData() {
+    return {
+      ...this
+    }
+  }
 }
 
-export const userService = new UserService();
+const userService = new UserService();
+
+export default userService;

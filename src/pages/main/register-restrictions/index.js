@@ -8,90 +8,120 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
 import api from '../../../services/api';
+import userService from '../../../services/user.service';
 
 export default class RegisterRestrictions extends Component {
-    state = {
-        components: [],
-        loadingComponents: true,
-        selectedComponents: []
-    }
+  state = {
+    components: [],
+    loadingComponents: true,
+    selectedComponents: [],
+    userRestrictions: [],
+    selectRef: null
+  }
 
-    fetchComponents = () => {
-        api.get('/component').then(response => {
-            this.setState({
-                components: [
-                    ...response.data.map(c => {
-                        return {
-                            value: c.id,
-                            label: c.nm_component
-                        }
-                    })
-                ],
-                loadingComponents: false
-            });
-        });
-    }
+  fetchComponents = () => {
+    return api.get('/component').then(response => {
+      this.setState({
+        components: [
+          ...response.data.map(c => {
+            return {
+              value: c.id,
+              label: c.nm_component
+            }
+          })
+        ],
+        loadingComponents: false
+      });
+    });
+  }
 
-    componentDidMount() {
-        this.fetchComponents();
-    }
+  fetchUserRestrictions = () => {
+    return api.get(`/user/${userService.id}/restrictions`).then(response => {
+      this.setState({
+        userRestrictions: response.data
+      });
+    });
+  }
 
-    onChangeList = values => {
-        this.setState({
-            selectedComponents: [
-                ...values.map(v => {
-                    return {
-                        id: v.value
-                    }
-                })
-            ]
-        });
-    }
-
-    saveList = (e) => {
-        console.log(e);
-        function exibe(item){
-            console.log(item)
+  fillRestrictions = () => {
+    this.setState({
+      selectedComponents: this.state.userRestrictions.map(r => {
+        return {
+          value: r.id_component,
+          label: r.component.nm_component
         }
-        e.forEach(exibe)
-    }
+      })
+    }, () => {
+      this.refs.selectRef.select.setValue(this.state.selectedComponents);
+    });
+  }
 
-    render() {
-        return (
-            <div id="register-restrictions" className="mt-3">
-                <Container>
-                    <Row className="d-flex justify-content-center">
-                        <Col md={8}>
-                            <h1>Registro de Restrições</h1>
+  componentDidMount() {
+    this.fetchComponents().then(() => {
+      this.fetchUserRestrictions().then(() => {
+        this.fillRestrictions();
+      });
+    });
+  }
 
-                            <div className="mt-4">
-                                <Form>
-                                    <Form.Group>
-                                        <Select
-                                            isMulti
-                                            isSearchable
-                                            isLoading={this.state.loadingComponents}
-                                            closeMenuOnSelect={false}
-                                            options={this.state.components}
-                                            onChange={this.onChangeList}
-                                            valueKey="id"
-                                            labelKey="name"
-                                            placeholder="Restrição" />
-                                    </Form.Group>
-                                </Form>
-                            </div>
-                        </Col>
-                    </Row>
+  onChangeList = values => {
+    this.setState({
+      selectedComponents: [
+        ...values.map(v => {
+          return {
+            id: v.value
+          }
+        })
+      ]
+    });
+  }
 
-                    <Row className="mt-3 d-flex justify-content-center">
-                        <Col md={8} className="d-flex justify-content-end">
-                            <Button variant="primary" onClick={this.saveList}>
-                                Salvar
-                            </Button>
-                        </Col>
-                    </Row>
-                </Container>
-            </div>
-        )
-    }
+  handleSave = () => {
+    const restrictions = this.state.selectedComponents.map(comp => {
+      return {
+        id_user: userService.id,
+        id_component: comp.id
+      }
+    });
+
+    api.post(`/user/${userService.id}/restrictions`, restrictions);
+  }
+
+  render() {
+    return (
+      <div id="register-restrictions" className="mt-3">
+        <Container>
+          <Row className="d-flex justify-content-center">
+            <Col md={8}>
+              <h1>Registro de Restrições</h1>
+
+              <div className="mt-4">
+                <Form>
+                  <Form.Group>
+                    <Select
+                      isMulti
+                      isSearchable
+                      isLoading={this.state.loadingComponents}
+                      closeMenuOnSelect={false}
+                      options={this.state.components}
+                      ref="selectRef"
+                      onChange={this.onChangeList}
+                      placeholder="Restrição" />
+                  </Form.Group>
+                </Form>
+              </div>
+            </Col>
+          </Row>
+
+          <Row className="mt-3 d-flex justify-content-center">
+            <Col md={8} className="d-flex justify-content-end">
+              <Button variant="primary" onClick={this.handleSave}>
+                Salvar
+              </Button>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    )
+  }
 }
