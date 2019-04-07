@@ -18,7 +18,7 @@ export default class RegisterComponents extends Component {
     }
 
     fetchComponents = () => {
-        api.get('/componentCategory').then(response => {
+        api.get('/component-category').then(response => {
             this.setState({
                 categories: [
                     ...response.data.map(c => {
