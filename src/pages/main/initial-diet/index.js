@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { LinkContainer } from 'react-router-bootstrap';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import Nav from 'react-bootstrap/Nav';
 
@@ -14,7 +14,7 @@ export default class InitialDiet extends Component {
       <div id="initial-diet">
         <h1>Dieta inicial</h1>
 
-        <div className="mt-5">
+        <div className="mt-3">
           <Nav fill variant="tabs" defaultActiveKey="/main/initial-diet/diet">
             <Nav.Item>
               <LinkContainer to="/main/initial-diet/diet">
@@ -28,12 +28,8 @@ export default class InitialDiet extends Component {
             </Nav.Item>
           </Nav>
 
-          <BrowserRouter>
-            <Switch>
-              <Route path="/main/initial-diet/diet" component={Diet} />
-              <Route path="/main/initial-diet/periods" component={Periods} />
-            </Switch>
-          </BrowserRouter>
+          <Route path="/main/initial-diet/diet" component={Diet} />
+          <Route path="/main/initial-diet/periods" component={Periods} />
         </div>
       </div>
     )

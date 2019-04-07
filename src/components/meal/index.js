@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -7,72 +8,53 @@ import Form from 'react-bootstrap/Form';
 
 import MealItem from './meal-item';
 
-export default class Meal extends Component {
+import { changeMeal, removeMeal, addMealItem } from '../../redux/actions/initial-diet';
+
+const mapStateToProps = (store, props) => {
+  return {
+    meal: store.initialDiet.meals[props.mealIndex]
+  }
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    changeMeal: payload => dispatch(changeMeal(payload)),
+    removeMeal: payload => dispatch(removeMeal(payload)),
+    addMealItem: payload => dispatch(addMealItem(payload))
+  }
+};
+
+class Meal extends Component {
   state = {
-    meal: {
-      id: null,
-      name: '',
-      items: [],
-      internalId: null
-    }
-  }
-
-  componentDidMount() {
-    this.setState({
-      meal: {
-        ...this.props.meal
-      },
-      isHoveringName: false,
-      isEditingName: false
-    });
-  }
-
-  handleMealChange = () => {
-    this.props.onChangeMeal && this.props.onChangeMeal({ ...this.state.meal }, this.props.mealIndex);
-  }
-
-  handleItemChange = (item, index) => {
-    const state = {
-      ...this.state
-    };
-
-    state.meal.items[index] = item;
-
-    this.setState(state, this.handleMealChange);
-  }
-
-  handleItemAddition = () => {
-    const state = {
-      ...this.state
-    };
-
-    state.meal.items.push({
-      id: null,
-      description: '',
-      amount: ''
-    });
-
-    this.setState(state, this.handleMealChange);
-  }
-
-  handleItemRemoval = itemIndex => {
-    const state = {
-      ...this.state
-    };
-
-    state.meal.items.splice(itemIndex, 1);
-
-    this.setState(state, this.handleMealChange);
+    isHoveringName: false,
+    isEditingName: false
   }
 
   handleMealNameChange = event => {
-    const state = {
-      ...this.state
-    };
+    this.props.changeMeal({
+      index: this.props.mealIndex,
+      item: {
+        ...this.props.meal,
+        [event.target.name]: event.target.value
+      }
+    });
+  }
 
-    state.meal.name = event.target.value;
+  handleMealRemoval = () => {
+    this.props.removeMeal({
+      index: this.props.mealIndex
+    });
+  }
 
-    this.setState(state, this.handleMealChange);
+  handleItemAddition = () => {
+    this.props.addMealItem({
+      index: this.props.mealIndex,
+      item: {
+        id: null,
+        description: '',
+        amount: ''
+      }
+    });
   }
 
   handleMealNameEdit = () => {
@@ -107,7 +89,7 @@ export default class Meal extends Component {
                 !this.state.isEditingName &&
                 <p
                   className="h5 d-inline-block">
-                  {this.state.meal.name}
+                  {this.props.meal.name}
                 </p>
               }
 
@@ -123,7 +105,7 @@ export default class Meal extends Component {
                   <span
                     style={{ cursor: 'pointer' }}
                     className="ml-3 oi oi-x"
-                    onClick={() => { this.props.onRemoveMeal && this.props.onRemoveMeal(this.props.mealIndex) }} >
+                    onClick={this.handleMealRemoval} >
                   </span>
                 </div>
               }
@@ -139,7 +121,7 @@ export default class Meal extends Component {
                   <Form.Control
                     type="text"
                     name="name"
-                    value={this.state.meal.name}
+                    value={this.props.meal.name}
                     onChange={this.handleMealNameChange}
                     onBlur={this.handleSubmit}
                     required
@@ -149,13 +131,11 @@ export default class Meal extends Component {
             }
 
             {
-              this.state.meal.items.map((item, index) => (
+              this.props.meal.items.map((item, index) => (
                 <MealItem
                   key={index}
-                  item={item}
                   itemIndex={index}
-                  onChangeItem={this.handleItemChange}
-                  onRemoveItem={this.handleItemRemoval} />
+                  mealIndex={this.props.mealIndex} />
               ))
             }
 
@@ -172,3 +152,5 @@ export default class Meal extends Component {
     )
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Meal);

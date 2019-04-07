@@ -54,7 +54,7 @@ export default class Login extends Component {
       <div id="login">
         <Container>
           <Row className="justify-content-md-center">
-            <Col md="5" className="m-5 p-5 bg-light border rounded">
+            <Col lg="5" className="m-5 p-5 bg-light border rounded">
               <div id="login-title" className="pt-2 pb-2 text-center">
                 <h2>Login</h2>
               </div>
