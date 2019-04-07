@@ -13,6 +13,7 @@ import ViewCalendar from '../view-calendar';
 import ShoppingChecklist from '../shopping-checklist';
 import RegisterRestrictions from '../register-restrictions';
 import RegisterComponents from '../register-components';
+import RegisterNutrients from '../register-nutrients';
 
 const MainContent = () => (
   <Container className="p-5">
@@ -28,6 +29,7 @@ const MainContent = () => (
             <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
             <Route path="/main/register-restrictions" component={RegisterRestrictions} />
             <Route path="/main/register-components" component={RegisterComponents} />
+            <Route path="/main/register-nutrients" component={RegisterNutrients} />
           </Switch>
         </BrowserRouter>
       </Col>
