@@ -12,7 +12,7 @@ import api from '../../../services/api';
 export default class RegisterNutrients extends Component {
 
     state = {
-        categories: [],
+        nutrients: [],
         loadingNutrient: true,
         selectedGroup: [],
         components: [],
@@ -22,7 +22,7 @@ export default class RegisterNutrients extends Component {
     fetchComponents = () => {
         api.get('/nutrient').then(response => {
             this.setState({
-                categories: [
+                nutrients: [
                     ...response.data.map(c => {
                         return {
                             value: c.id,
@@ -111,7 +111,7 @@ export default class RegisterNutrients extends Component {
                                             isSearchable
                                             isLoading={this.state.loadingNutrient}
                                             closeMenuOnSelect={false}
-                                            options={this.state.categories}
+                                            options={this.state.nutrients}
                                             onChange={this.onChangeList}
                                             id="id_nutrient"
                                             name="id_nutrient"
