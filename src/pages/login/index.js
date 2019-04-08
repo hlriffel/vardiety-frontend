@@ -10,7 +10,7 @@ import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 
 import api from '../../services/api';
-import { userService } from '../../services/user.service';
+import userService from '../../services/user.service';
 
 export default class Login extends Component {
   state = {
@@ -39,6 +39,7 @@ export default class Login extends Component {
       });
 
       userService.setData(res.data);
+      localStorage.setItem('userData', JSON.stringify(userService.getData()));
       history.push('/main');
     }).catch(err => {
       if (err.response.status === 404) {
