@@ -21,6 +21,9 @@ export default class Header extends Component {
             <LinkContainer to="/main">
               <Nav.Link>Home</Nav.Link>
             </LinkContainer>
+            <LinkContainer to="/main/register-restrictions">
+              <Nav.Link>Cadastrar restrições</Nav.Link>
+            </LinkContainer>
             { /* Controlar se o usuário logado é nutricionista. Se não for, esconde esse cara */ }
             <LinkContainer to="/main/patient-list">
               <Nav.Link>Lista de pacientes</Nav.Link>

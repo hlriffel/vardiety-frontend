@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -18,18 +18,14 @@ const MainContent = () => (
   <Container className="p-5">
     <Row>
       <Col>
-        <BrowserRouter>
-          <Switch>
-            <Route path="/main/invite-patient" component={InvitePatient} />
-            <Route path="/main/patient-list" component={PatientList} />
-            <Route path="/main/initial-diet" component={InitialDiet} />
-            <Route path="/main/generate-calendar" component={GenerateCalendar} />
-            <Route path="/main/view-calendar" component={ViewCalendar} />
-            <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
-            <Route path="/main/register-restrictions" component={RegisterRestrictions} />
-            <Route path="/main/register-components" component={RegisterComponents} />
-          </Switch>
-        </BrowserRouter>
+        <Route path="/main/invite-patient" component={InvitePatient} />
+        <Route path="/main/patient-list" component={PatientList} />
+        <Route path="/main/initial-diet" component={InitialDiet} />
+        <Route path="/main/generate-calendar" component={GenerateCalendar} />
+        <Route path="/main/view-calendar" component={ViewCalendar} />
+        <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
+        <Route path="/main/register-restrictions" component={RegisterRestrictions} />
+        <Route path="/main/register-components" component={RegisterComponents} />
       </Col>
     </Row>
   </Container>
