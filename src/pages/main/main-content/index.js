@@ -19,19 +19,15 @@ const MainContent = () => (
   <Container className="p-5">
     <Row>
       <Col>
-        <BrowserRouter>
-          <Switch>
-            <Route path="/main/invite-patient" component={InvitePatient} />
-            <Route path="/main/patient-list" component={PatientList} />
-            <Route path="/main/initial-diet" component={InitialDiet} />
-            <Route path="/main/generate-calendar" component={GenerateCalendar} />
-            <Route path="/main/view-calendar" component={ViewCalendar} />
-            <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
-            <Route path="/main/register-restrictions" component={RegisterRestrictions} />
-            <Route path="/main/register-components" component={RegisterComponents} />
-            <Route path="/main/register-nutrients" component={RegisterNutrients} />
-          </Switch>
-        </BrowserRouter>
+        <Route path="/main/invite-patient" component={InvitePatient} />
+        <Route path="/main/patient-list" component={PatientList} />
+        <Route path="/main/initial-diet" component={InitialDiet} />
+        <Route path="/main/generate-calendar" component={GenerateCalendar} />
+        <Route path="/main/view-calendar" component={ViewCalendar} />
+        <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
+        <Route path="/main/register-restrictions" component={RegisterRestrictions} />
+        <Route path="/main/register-components" component={RegisterComponents} />
+        <Route path="/main/register-nutrients" component={RegisterNutrients} />
       </Col>
     </Row>
   </Container>
