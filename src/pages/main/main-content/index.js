@@ -8,7 +8,6 @@ import Col from 'react-bootstrap/Col';
 import InvitePatient from '../invite-patient';
 import PatientList from '../patient-list';
 import InitialDiet from '../initial-diet';
-import GenerateCalendar from '../generate-calendar';
 import ViewCalendar from '../view-calendar';
 import ShoppingChecklist from '../shopping-checklist';
 import RegisterRestrictions from '../register-restrictions';
@@ -21,9 +20,8 @@ const MainContent = () => (
       <Col>
         <Route path="/main/invite-patient" component={InvitePatient} />
         <Route path="/main/patient-list" component={PatientList} />
-        <Route path="/main/initial-diet" component={InitialDiet} />
-        <Route path="/main/generate-calendar" component={GenerateCalendar} />
-        <Route path="/main/view-calendar" component={ViewCalendar} />
+        <Route path="/main/initial-diet/:patientId" component={InitialDiet} />
+        <Route path="/main/view-calendar/:patientId" component={ViewCalendar} />
         <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
         <Route path="/main/register-restrictions" component={RegisterRestrictions} />
         <Route path="/main/register-components" component={RegisterComponents} />

@@ -8,6 +8,9 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
+import api from '../../../../services/api';
+import userService from '../../../../services/user.service';
+
 const mapStateToProps = state => {
   return {
     meals: state.initialDiet.meals
@@ -26,13 +29,13 @@ class Periods extends Component {
   ]
 
   weekDayOptions = [
-    { value: 'SEG', label: 'Segunda-feira' },
-    { value: 'TER', label: 'Terça-feira' },
-    { value: 'QUA', label: 'Quarta-feira' },
-    { value: 'QUI', label: 'Quinta-feira' },
-    { value: 'SEX', label: 'Sexta-feira' },
-    { value: 'SAB', label: 'Sábado' },
-    { value: 'DOM', label: 'Domingo' }
+    { value: 1, label: 'Segunda-feira' },
+    { value: 2, label: 'Terça-feira' },
+    { value: 3, label: 'Quarta-feira' },
+    { value: 4, label: 'Quinta-feira' },
+    { value: 5, label: 'Sexta-feira' },
+    { value: 6, label: 'Sábado' },
+    { value: 7, label: 'Domingo' }
   ]
 
   handlePeriodChange = event => {
@@ -48,7 +51,9 @@ class Periods extends Component {
   }
 
   handleGenerateCalendar = () => {
-    const params = {
+    const data = {
+      nutritionistId: userService.id,
+      patientId: this.props.patientId,
       meals: this.props.meals,
       periods: {
         period: this.state.period,
@@ -58,7 +63,7 @@ class Periods extends Component {
       }
     };
 
-    console.log(params);
+    api.post('/initial-diet/create', data);
   }
 
   render() {
