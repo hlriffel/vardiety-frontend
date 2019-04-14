@@ -15,21 +15,25 @@ export default class InitialDiet extends Component {
         <h1>Dieta inicial</h1>
 
         <div className="mt-3">
-          <Nav fill variant="tabs" defaultActiveKey="/main/initial-diet/diet">
+          <Nav fill variant="tabs" defaultActiveKey={`/main/initial-diet/${this.props.match.params.patientId}/diet`}>
             <Nav.Item>
-              <LinkContainer to="/main/initial-diet/diet">
+              <LinkContainer to={`/main/initial-diet/${this.props.match.params.patientId}/diet`}>
                 <Nav.Link>Dieta</Nav.Link>
               </LinkContainer>
             </Nav.Item>
             <Nav.Item>
-              <LinkContainer to="/main/initial-diet/periods">
+              <LinkContainer to={`/main/initial-diet/${this.props.match.params.patientId}/periods`}>
                 <Nav.Link>Períodos</Nav.Link>
               </LinkContainer>
             </Nav.Item>
           </Nav>
 
-          <Route path="/main/initial-diet/diet" component={Diet} />
-          <Route path="/main/initial-diet/periods" component={Periods} />
+          <Route
+            path={`/main/initial-diet/${this.props.match.params.patientId}/diet`}
+            render={props => <Diet {...props} patientId={this.props.match.params.patientId} /> } />
+          <Route
+            path={`/main/initial-diet/${this.props.match.params.patientId}/periods`}
+            render={props => <Periods {...props} patientId={this.props.match.params.patientId} /> } />
         </div>
       </div>
     )

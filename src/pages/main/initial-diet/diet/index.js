@@ -44,7 +44,7 @@ class Diet extends Component {
   }
 
   handleNextClick = () => {
-    this.props.history.push('/main/initial-diet/periods');
+    this.props.history.push(`/main/initial-diet/${this.props.patientId}/periods`);
   }
 
   renderAddMealButton = index => (

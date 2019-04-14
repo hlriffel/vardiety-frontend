@@ -85,6 +85,7 @@ class MealItem extends Component {
               name="amount"
               value={this.props.item.amount}
               placeholder="Gramas"
+              min="0"
               onChange={this.handleChange} />
           </Form.Group>
 

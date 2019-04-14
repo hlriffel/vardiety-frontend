@@ -8,7 +8,7 @@ import userService from '../../services/user.service';
 
 export class Main extends Component {
 
-  componentDidMount() {
+  componentWillMount() {
     if (!userService.id) {
       const userDataStr = localStorage.getItem('userData');
       const userData = JSON.parse(userDataStr);
