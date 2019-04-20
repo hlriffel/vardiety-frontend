@@ -16,7 +16,8 @@ export default class RegisterNutrients extends Component {
         loadingNutrient: true,
         selectedGroup: [],
         components: [],
-        loadingComponents: true
+        loadingComponents: true,
+        qtNutrient: 0
     }
 
     fetchComponents = () => {
@@ -65,12 +66,21 @@ export default class RegisterNutrients extends Component {
         });
     }
 
-    saveList = (e) => {
-        console.log(e);
-        function exibe(item) {
-            console.log(item)
+    handleChange = event => {
+        this.setState({
+            [event.target.name]: event.target.value
+        });
+    }
+
+    handleSave = () => {
+
+        const data = {
+            componentId: this.state.loadingNutrient.id,
+            nutrientId: this.state.categories.id,
+            nutrientQuant: this.state.qtNutrient
         }
-        e.forEach(exibe)
+
+        api.post('/nutrient-component/create', data);
     }
 
     render() {
@@ -128,6 +138,8 @@ export default class RegisterNutrients extends Component {
                                         type="text-number"
                                         id="qt_nutrient"
                                         name="qt_nutrient"
+                                        value={this.state.qtNutrient}
+                                        onChange={this.handleChange}
                                         placeholder="Quantidade do nutriente"
                                         required />
                                 </Form>
@@ -137,7 +149,7 @@ export default class RegisterNutrients extends Component {
 
                     <Row className="mt-3 d-flex justify-content-center">
                         <Col md={8} className="d-flex justify-content-end">
-                            <Button variant="primary" onClick={this.saveList}>
+                            <Button variant="primary" onClick={this.handleSave}>
                                 Salvar
                             </Button>
                         </Col>

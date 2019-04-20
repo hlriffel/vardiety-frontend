@@ -14,6 +14,7 @@ export default class RegisterComponents extends Component {
     state = {
         categories: [],
         loadingCategories: true,
+        nmComponent: '',
         selectedGroup: []
     }
 
@@ -49,12 +50,20 @@ export default class RegisterComponents extends Component {
         });
     }
 
-    saveList = (e) => {
-        console.log(e);
-        function exibe(item) {
-            console.log(item)
+    handleChange = event => {
+        this.setState({
+            [event.target.name]: event.target.value
+        });
+    }
+
+    handleSave = () => {
+
+        const data = {
+            componentName: this.state.nmComponent,
+            categoryId: this.state.categories.id
         }
-        e.forEach(exibe)
+
+        api.post('/component/create', data);
     }
 
     render() {
@@ -67,16 +76,15 @@ export default class RegisterComponents extends Component {
                             <h1>Registro de Componentes</h1>
 
                             <div className="mt-4">
-                                <Form>
-                                    <label for="nm_component">Descrição:</label>
+                                <Form.Group>
+                                    <Form.Label>Descrição:</Form.Label>
                                     <Form.Control
-                                        inline
                                         type="text"
                                         id="nm_component"
                                         name="nm_component"
-                                        placeholder="Insira o nome do componente"
-                                        required />
-                                </Form>
+                                        onChange={this.handleChange}
+                                        placeholder="Insira o nome do componente" />
+                                </Form.Group>
                             </div>
 
                             <div className="mt-4">
@@ -103,7 +111,7 @@ export default class RegisterComponents extends Component {
 
                     <Row className="mt-3 d-flex justify-content-center">
                         <Col md={8} className="d-flex justify-content-end">
-                            <Button variant="primary" onClick={this.saveList}>
+                            <Button variant="primary" onClick={this.handleSave}>
                                 Salvar
                             </Button>
                         </Col>
