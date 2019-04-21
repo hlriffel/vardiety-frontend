@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 
+import { CalendarDay } from './calendar-day';
+
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 
 import '@fullcalendar/core/main.css';
@@ -20,25 +23,49 @@ const colors = [
 
 export default class ViewCalendar extends Component {
   state = {
-    events: []
+    events: [],
+    calendarDays: [],
+    toCalendarDay: {
+      show: false,
+      day: {
+        date: null,
+        meals: []
+      }
+    }
   };
 
-  componentDidMount() {
+  calendarOptions = {
+    customButtons: {
+      clearCalendar: {
+        text: 'Limpar calendário',
+        click: () => {
+          this.handleCalendarClear();
+        }
+      }
+    },
+    header: {
+      left: 'title',
+      right: 'clearCalendar prev today next'
+    },
+    defaultView: 'dayGridMonth',
+    plugins: [ dayGridPlugin, interactionPlugin ],
+    locale: ptBrLocale,
+    eventOrder: 'id'
+  };
+
+  loadEvents = () => {
     const { nutritionistId, patientId } = this.props.match.params;
 
     api.get(`/calendar/${nutritionistId}/${patientId}`).then(response => {
       const calendarData = response.data;
       const events = [];
 
-      calendarData.days.forEach(day => {
-        let start = new Date(day.dt_day);
-        start = start.getFullYear() + '-' + ('0' + (start.getMonth() + 1)).slice(-2) + '-' + ('0' + start.getDate()).slice(-2);
-
+      calendarData && calendarData.days.forEach(day => {
         day.meals.forEach((meal, index) => {
           events.push({
             id: meal.id,
             title: meal.ds_meal,
-            start,
+            start: this.dateToSimpleISO(new Date(day.dt_day)),
             borderColor: colors[index].background,
             backgroundColor: colors[index].background,
             textColor: colors[index].text,
@@ -50,8 +77,70 @@ export default class ViewCalendar extends Component {
       });
 
       this.setState({
-        events
+        events,
+        calendarDays: calendarData.days || []
       });
+    });
+  }
+
+  componentDidMount() {
+    this.loadEvents();
+  }
+
+  dateToSimpleISO = date => {
+    return date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+  }
+
+  handleCalendarClear = () => {
+    const { nutritionistId, patientId } = this.props.match.params;
+
+    api.delete(`/calendar/${nutritionistId}/${patientId}`).then(() => {
+      this.loadEvents();
+    });
+  }
+
+  handleDateClick = event => {
+    const clickedDate = event.dateStr;
+    const calendarDay = this.state.calendarDays.find(day => {
+      return this.dateToSimpleISO(new Date(day.dt_day)) === clickedDate; 
+    });
+
+    if (calendarDay) {
+      const meals = calendarDay.meals.map(meal => {
+        return {
+          id: meal.id,
+          name: meal.ds_meal,
+          items: meal.components.map(item => {
+            return {
+              id: item.component.id,
+              description: item.component.nm_component,
+              amount: item.qt_grams.toFixed(0)
+            }
+          })
+        }
+      });
+
+      this.setState({
+        toCalendarDay: {
+          show: true,
+          day: {
+            date: clickedDate,
+            meals
+          }
+        }
+      });
+    }
+  }
+
+  handleCalendarDayClose = () => {
+    this.setState({
+      toCalendarDay: {
+        show: false,
+        day: {
+          date: null,
+          meals: []
+        }
+      }
     });
   }
 
@@ -59,11 +148,16 @@ export default class ViewCalendar extends Component {
     return (
       <div id="view-calendar">
         <FullCalendar
-          defaultView="dayGridMonth"
-          plugins={[dayGridPlugin]}
-          locale={ptBrLocale}
+          {...this.calendarOptions}
           events={this.state.events}
-          eventOrder="id" />
+          dateClick={this.handleDateClick} />
+
+        { this.state.toCalendarDay.show &&
+          <CalendarDay
+            show={this.state.toCalendarDay.show}
+            onClose={this.handleCalendarDayClose}
+            title={this.state.toCalendarDay.day.date}
+            meals={this.state.toCalendarDay.day.meals} />}
       </div>
     );
   }

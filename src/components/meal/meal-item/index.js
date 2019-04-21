@@ -7,20 +7,16 @@ import Button from 'react-bootstrap/Button';
 
 import Select from 'react-select';
 
-import { changeMealItem, removeMealItem } from '../../../redux/actions/initial-diet';
 import { fetchAllComponents } from '../../../redux/actions/components';
 
-const mapStateToProps = (state, props) => {
+const mapStateToProps = state => {
   return {
-    item: state.initialDiet.meals[props.mealIndex].items[props.itemIndex],
     components: state.components
   }
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    changeMealItem: payload => dispatch(changeMealItem(payload)),
-    removeMealItem: payload => dispatch(removeMealItem(payload)),
     fetchAllComponents: () => dispatch(fetchAllComponents())
   }
 };
@@ -34,6 +30,8 @@ class MealItem extends Component {
   }
 
   handleChange = (event, meta) => {
+    if (!this.props.onChangeItem) return;
+
     let newItem;
 
     if (!meta) {
@@ -47,7 +45,7 @@ class MealItem extends Component {
       }
     }
 
-    this.props.changeMealItem({
+    this.props.onChangeItem({
       mealIndex: this.props.mealIndex,
       itemIndex: this.props.itemIndex,
       item: {
@@ -58,7 +56,7 @@ class MealItem extends Component {
   }
 
   handleRemoval = () => {
-    this.props.removeMealItem({
+    this.props.onRemoveItem && this.props.onRemoveItem({
       mealIndex: this.props.mealIndex,
       itemIndex: this.props.itemIndex
     });
@@ -67,14 +65,15 @@ class MealItem extends Component {
   render() {
     return (
       <Form>
-        <Form.Row>
-          <Form.Group as={Col} lg="9">
+        <Form.Row className="d-flex justify-content-between m-0">
+          <Form.Group as={Col} lg="8">
             <Select
               name="id"
               placeholder="Componente"
               isSearchable
               isLoading={this.props.components.loading}
               options={this.props.components.items}
+              value={{ value: this.props.item.id, label: this.props.item.description }}
               defaultInputValue={this.props.item.description}
               onChange={this.handleChange} />
           </Form.Group>
@@ -92,7 +91,7 @@ class MealItem extends Component {
           <Form.Group className="ml-2">
             <Button
               variant="danger"
-              onClick={this.handleRemoval}>
+              onClick={this.handleRemoval} >
               <span className="oi oi-x"></span>
             </Button>
           </Form.Group>
