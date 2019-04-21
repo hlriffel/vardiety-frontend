@@ -95,7 +95,7 @@ export default class PatientList extends Component {
 
   render() {
     if (this.state.toViewCalendar.state === true) {
-      return (<Redirect to={`/main/view-calendar/${this.state.toViewCalendar.patientId}`} />)
+      return (<Redirect to={`/main/view-calendar/${userService.id}/${this.state.toViewCalendar.patientId}`} />)
     }
 
     if (this.state.toInitialDiet.state === true) {
