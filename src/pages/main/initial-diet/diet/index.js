@@ -6,9 +6,16 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-import Meal from '../../../../components/meal';
+import { Meal } from '../../../../components/meal';
 
-import { addMeal } from '../../../../redux/actions/initial-diet';
+import {
+  addMeal,
+  changeMeal,
+  removeMeal,
+  addMealItem,
+  changeMealItem,
+  removeMealItem
+} from '../../../../redux/actions/initial-diet';
 
 const mapStateToProps = state => {
   return {
@@ -18,7 +25,12 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    addMeal: payload => dispatch(addMeal(payload))
+    addMeal: payload => dispatch(addMeal(payload)),
+    changeMeal: payload => dispatch(changeMeal(payload)),
+    removeMeal: payload => dispatch(removeMeal(payload)),
+    addMealItem: payload => dispatch(addMealItem(payload)),
+    changeMealItem: payload => dispatch(changeMealItem(payload)),
+    removeMealItem: payload => dispatch(removeMealItem(payload))
   }
 };
 
@@ -41,6 +53,26 @@ class Diet extends Component {
     const mealIndex = index === undefined ? 0 : index + 1;
 
     this.props.addMeal({ index: mealIndex, item: newMeal });
+  }
+
+  handleMealChanging = payload => {
+    this.props.changeMeal(payload);
+  }
+
+  handleMealRemoval = payload => {
+    this.props.removeMeal(payload);
+  }
+
+  handleMealItemAddition = payload => {
+    this.props.addMealItem(payload);
+  }
+
+  handleMealItemChanging = payload => {
+    this.props.changeMealItem(payload);
+  }
+
+  handleMealItemRemoval = payload => {
+    this.props.removeMealItem(payload);
   }
 
   handleNextClick = () => {
@@ -72,7 +104,13 @@ class Diet extends Component {
             this.props.meals.map((meal, index) => (
               <div key={meal.internalId}>
                 <Meal
-                  mealIndex={index} />
+                  meal={meal}
+                  mealIndex={index}
+                  onChangeMeal={this.handleMealChanging}
+                  onRemoveMeal={this.handleMealRemoval}
+                  onAddMealItem={this.handleMealItemAddition}
+                  onChangeMealItem={this.handleMealItemChanging}
+                  onRemoveMealItem={this.handleMealItemRemoval} />
 
                 {
                   this.renderAddMealButton(index)

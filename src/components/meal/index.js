@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -8,30 +7,14 @@ import Form from 'react-bootstrap/Form';
 
 import MealItem from './meal-item';
 
-import { changeMeal, removeMeal, addMealItem } from '../../redux/actions/initial-diet';
-
-const mapStateToProps = (store, props) => {
-  return {
-    meal: store.initialDiet.meals[props.mealIndex]
-  }
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    changeMeal: payload => dispatch(changeMeal(payload)),
-    removeMeal: payload => dispatch(removeMeal(payload)),
-    addMealItem: payload => dispatch(addMealItem(payload))
-  }
-};
-
-class Meal extends Component {
+export class Meal extends Component {
   state = {
     isHoveringName: false,
     isEditingName: false
   }
 
   handleMealNameChange = event => {
-    this.props.changeMeal({
+    this.props.onChangeMeal && this.props.onChangeMeal({
       index: this.props.mealIndex,
       item: {
         ...this.props.meal,
@@ -41,13 +24,13 @@ class Meal extends Component {
   }
 
   handleMealRemoval = () => {
-    this.props.removeMeal({
+    this.props.onRemoveMeal && this.props.onRemoveMeal({
       index: this.props.mealIndex
     });
   }
 
   handleItemAddition = () => {
-    this.props.addMealItem({
+    this.props.onAddMealItem && this.props.onAddMealItem({
       index: this.props.mealIndex,
       item: {
         id: null,
@@ -80,7 +63,7 @@ class Meal extends Component {
     return (
       <div>
         <Row className="p-3 d-flex justify-content-center">
-          <Col md={8}>
+          <Col lg={8}>
             <div
               id="meal-name"
               onMouseOver={() => { this.setState({ isHoveringName: true }) }}
@@ -134,11 +117,17 @@ class Meal extends Component {
               this.props.meal.items.map((item, index) => (
                 <MealItem
                   key={index}
+                  item={item}
                   itemIndex={index}
-                  mealIndex={this.props.mealIndex} />
+                  mealIndex={this.props.mealIndex}
+                  onChangeItem={this.props.onChangeMealItem}
+                  onRemoveItem={this.props.onRemoveMealItem} />
               ))
             }
-
+          </Col>
+        </Row>
+        <Row className="pl-3 pr-3 d-flex justify-content-center">
+          <Col lg={8}>
             <div className="d-flex justify-content-end">
               <Button
                 variant="success"
@@ -152,5 +141,3 @@ class Meal extends Component {
     )
   }
 }
-
-export default connect(mapStateToProps, mapDispatchToProps)(Meal);
