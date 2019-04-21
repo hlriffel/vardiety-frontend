@@ -21,7 +21,7 @@ const MainContent = () => (
         <Route path="/main/invite-patient" component={InvitePatient} />
         <Route path="/main/patient-list" component={PatientList} />
         <Route path="/main/initial-diet/:patientId" component={InitialDiet} />
-        <Route path="/main/view-calendar/:patientId" component={ViewCalendar} />
+        <Route path="/main/view-calendar/:nutritionistId/:patientId" component={ViewCalendar} />
         <Route path="/main/shopping-checklist" component={ShoppingChecklist} />
         <Route path="/main/register-restrictions" component={RegisterRestrictions} />
         <Route path="/main/register-components" component={RegisterComponents} />
