@@ -12,6 +12,8 @@ import '@fullcalendar/daygrid/main.css';
 
 import api from '../../../services/api';
 
+import { Loader } from '../../../components/loader';
+
 const colors = [
   { background: '#ffca28', text: '#fff8e1' },
   { background: '#81c784', text: '#e8f5e9' },
@@ -31,7 +33,8 @@ export default class ViewCalendar extends Component {
         date: null,
         meals: []
       }
-    }
+    },
+    loaderVisible: false
   };
 
   calendarOptions = {
@@ -50,35 +53,41 @@ export default class ViewCalendar extends Component {
     defaultView: 'dayGridMonth',
     plugins: [ dayGridPlugin, interactionPlugin ],
     locale: ptBrLocale,
-    eventOrder: 'id'
+    eventOrder: 'order'
   };
 
   loadEvents = () => {
-    const { nutritionistId, patientId } = this.props.match.params;
-
-    api.get(`/calendar/${nutritionistId}/${patientId}`).then(response => {
-      const calendarData = response.data;
-      const events = [];
-
-      calendarData && calendarData.days.forEach(day => {
-        day.meals.forEach((meal, index) => {
-          events.push({
-            id: meal.id,
-            title: meal.ds_meal,
-            start: this.dateToSimpleISO(new Date(day.dt_day)),
-            borderColor: colors[index].background,
-            backgroundColor: colors[index].background,
-            textColor: colors[index].text,
-            extendedProps: {
-              mealItems: meal.components
-            }
+    this.setState({
+      loaderVisible: true
+    }, () => {
+      const { nutritionistId, patientId } = this.props.match.params;
+  
+      api.get(`/calendar/${nutritionistId}/${patientId}`).then(response => {
+        const calendarData = response.data;
+        const events = [];
+  
+        calendarData && calendarData.days.forEach(day => {
+          day.meals.forEach((meal, index) => {
+            events.push({
+              id: meal.id,
+              title: meal.ds_meal,
+              start: this.dateToSimpleISO(new Date(day.dt_day)),
+              borderColor: colors[index].background,
+              backgroundColor: colors[index].background,
+              textColor: colors[index].text,
+              extendedProps: {
+                mealItems: meal.components
+              },
+              order: index
+            });
           });
         });
-      });
-
-      this.setState({
-        events,
-        calendarDays: calendarData.days || []
+  
+        this.setState({
+          events,
+          calendarDays: calendarData.days || [],
+          loaderVisible: false
+        });
       });
     });
   }
@@ -94,8 +103,16 @@ export default class ViewCalendar extends Component {
   handleCalendarClear = () => {
     const { nutritionistId, patientId } = this.props.match.params;
 
-    api.delete(`/calendar/${nutritionistId}/${patientId}`).then(() => {
-      this.loadEvents();
+    this.setState({
+      loaderVisible: true
+    }, () => {
+      api.delete(`/calendar/${nutritionistId}/${patientId}`).then(() => {
+        this.loadEvents();
+
+        this.setState({
+          loaderVisible: false
+        });
+      });
     });
   }
 
@@ -146,19 +163,23 @@ export default class ViewCalendar extends Component {
 
   render() {
     return (
-      <div id="view-calendar">
-        <FullCalendar
-          {...this.calendarOptions}
-          events={this.state.events}
-          dateClick={this.handleDateClick} />
+      <>
+        <div id="view-calendar">
+          <FullCalendar
+            {...this.calendarOptions}
+            events={this.state.events}
+            dateClick={this.handleDateClick} />
 
-        { this.state.toCalendarDay.show &&
-          <CalendarDay
-            show={this.state.toCalendarDay.show}
-            onClose={this.handleCalendarDayClose}
-            title={this.state.toCalendarDay.day.date}
-            meals={this.state.toCalendarDay.day.meals} />}
-      </div>
+          { this.state.toCalendarDay.show &&
+            <CalendarDay
+              show={this.state.toCalendarDay.show}
+              onClose={this.handleCalendarDayClose}
+              title={this.state.toCalendarDay.day.date}
+              meals={this.state.toCalendarDay.day.meals} />}
+        </div>
+
+        { this.state.loaderVisible && <Loader /> }
+      </>
     );
   }
 }
