@@ -1,22 +1,110 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 
+import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
+import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
 import Select from 'react-select';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-
 import api from '../../../services/api';
+import userService from '../../../services/user.service';
 
-export default class RegisterComponents extends Component {
+const CommandButton = ({
+  onExecute, icon, text, hint, color,
+}) => (
+        <button
+            type="button"
+            className="btn btn-link"
+            style={{ padding: 11 }}
+            onClick={(e) => {
+                onExecute();
+                e.stopPropagation();
+            }}
+            title={hint}
+        >
+            <span className={color || 'undefined'}>
+                {icon ? <i className={`oi oi-${icon}`} style={{ marginRight: text ? 5 : 0 }} /> : null}
+                {text}
+            </span>
+        </button>
+    );
+
+const AddButton = ({ onExecute }) => (
+    <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
+);
+
+const EditButton = ({ onExecute }) => (
+    <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+);
+
+const DeleteButton = ({ onExecute }) => (
+    <CommandButton
+        icon="trash"
+        hint="Delete row"
+        color="text-danger"
+        onExecute={() => {
+            // eslint-disable-next-line
+            if (window.confirm('Are you sure you want to delete this row?')) {
+                onExecute();
+            }
+        }}
+    />
+);
+
+const CommitButton = ({ onExecute }) => (
+    <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+);
+
+const CancelButton = ({ onExecute }) => (
+    <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+);
+
+const commandComponents = {
+    add: AddButton,
+    edit: EditButton,
+    delete: DeleteButton,
+    commit: CommitButton,
+    cancel: CancelButton,
+};
+
+const tableMessages = {
+    noData: 'Sem componentes'
+}
+
+const Command = ({ id, onExecute }) => {
+    const ButtonComponent = commandComponents[id];
+    return (
+        <ButtonComponent
+            onExecute={onExecute}
+        />
+    );
+};
+
+export default class RegisterComponents extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+
+        this.changeCurrentPage = currentPage => this.setState({ currentPage });
+        this.changePageSize = pageSize => this.setState({ pageSize });
+    }
 
     state = {
         categories: [],
         loadingCategories: true,
         nmComponent: '',
-        selectedGroup: []
-    }
+        selectedGroup: [],
+        columns: [
+            { name: 'id', title: 'ID geral' },
+            { name: 'nm_component', title: 'Descrição do componente' },
+            {
+                name: 'id_category',
+                title: 'Categoria'
+            }
+        ],
+        rows: [],
+        currentPage: 5,
+        pageSize: 5,
+        pageSizes: [5, 10, 0],
+    };
 
     fetchComponents = () => {
         api.get('/component-category').then(response => {
@@ -34,11 +122,81 @@ export default class RegisterComponents extends Component {
         });
     }
 
+    renderEditCell = (props) => {
+        const { column } = props;
+
+        if (column.name == 'id_category') {
+            return this.renderLookupEditCell();
+        } else if (column.name == 'id') {
+            return <TableEditRow.Row {...props} />;
+        }
+        return <TableEditRow.Cell {...props} width={'350px'} onChange={this.handleChange()} />;
+    };
+
     componentDidMount() {
         this.fetchComponents();
+
+        api.get(`/component`).then(response => {
+            this.setState({
+                rows: [
+                    ...response.data.map(r => {
+                        return {
+                            id: r.id,
+                            nm_component: r.nm_component,
+                            id_category: r.id_category
+                        }
+                    })
+                ]
+            });
+        });
     }
 
-    onChangeList = values => {
+    renderLookupEditCell = () => (
+        <td
+            style={{
+                verticalAlign: 'middle',
+                padding: 1,
+            }}
+        >
+            <div className="mt-3">
+                <Form>
+                    <Form.Group>
+                        <Select
+                            isMulti
+                            isSearchable
+                            isLoading={this.state.loadingCategories}
+                            closeMenuOnSelect={false}
+                            options={this.state.categories}
+                            onChange={this.handleChangeList}
+                            id="id_category"
+                            name="id_category"
+                            valueKey="id"
+                            labelKey="nm_category" />
+                    </Form.Group>
+                </Form>
+            </div>
+        </td>
+    )
+
+    handleChange = value => {
+        if (value) {
+            this.setState({
+                nm_component: value
+            });
+        }
+    }
+
+    handleSave = () => {
+
+        const data = {
+            componentName: this.state.nmComponent,
+            categoryId: this.state.selectedGroup[0].id
+        }
+
+        api.post('/component/create', data);
+    }
+
+    handleChangeList = values => {
         this.setState({
             selectedGroup: [
                 ...values.map(v => {
@@ -50,74 +208,56 @@ export default class RegisterComponents extends Component {
         });
     }
 
-    handleChange = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
-    }
+    commitChanges = ({ added, changed, deleted }) => {
+        let { rows } = this.state;
 
-    handleSave = () => {
-
-        const data = {
-            componentName: this.state.nmComponent,
-            categoryId: this.state.categories.id
+        if (added) {
+            this.handleSave();
+        } else if (changed) {
+            rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
+        } else if (deleted) {
+            const deletedSet = new Set(deleted);
+            rows = rows.filter(row => !deletedSet.has(row.id));
         }
-
-        api.post('/component/create', data);
+        this.setState({ rows });
     }
 
     render() {
+        const { columns, rows, currentPage, pageSize, pageSizes } = this.state;
+
         return (
-            <div id="register-components" className="mt-3">
-                <Container>
+            <div className="card">
+                <Grid
+                    rows={rows}
+                    columns={columns} >
 
-                    <Row className="d-flex justify-content-center">
-                        <Col md={8}>
-                            <h1>Registro de Componentes</h1>
+                    <PagingState
+                        currentPage={currentPage}
+                        onCurrentPageChange={this.changeCurrentPage}
+                        pageSize={pageSize}
+                        onPageSizeChange={this.changePageSize}
+                        defaultCurrentPage={0}
+                        defaultPageSize={5}
+                    />
+                    <EditingState
+                        onCommitChanges={this.commitChanges} />
 
-                            <div className="mt-4">
-                                <Form.Group>
-                                    <Form.Label>Descrição:</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        id="nm_component"
-                                        name="nm_component"
-                                        onChange={this.handleChange}
-                                        placeholder="Insira o nome do componente" />
-                                </Form.Group>
-                            </div>
+                    <IntegratedPaging />
 
-                            <div className="mt-4">
-                                <Form>
-                                    <label for="id_category">Categoria:</label>
-                                    <Form.Group>
-                                        <Select
-                                            isMulti
-                                            isSearchable
-                                            isLoading={this.state.loadingCategories}
-                                            closeMenuOnSelect={false}
-                                            options={this.state.categories}
-                                            onChange={this.onChangeList}
-                                            id="id_category"
-                                            name="id_category"
-                                            valueKey="id"
-                                            labelKey="nm_category"
-                                            placeholder="Informe a categoria do componente" />
-                                    </Form.Group>
-                                </Form>
-                            </div>
-                        </Col>
-                    </Row>
-
-                    <Row className="mt-3 d-flex justify-content-center">
-                        <Col md={8} className="d-flex justify-content-end">
-                            <Button variant="primary" onClick={this.handleSave}>
-                                Salvar
-                            </Button>
-                        </Col>
-                    </Row>
-                </Container>
+                    <Table
+                        messages={tableMessages} />
+                    <TableHeaderRow />
+                    <TableEditRow cellComponent={this.renderEditCell} />
+                    <TableEditColumn
+                        showAddCommand
+                        showEditCommand
+                        showDeleteCommand
+                        commandComponent={Command} />
+                    <PagingPanel
+                        pageSizes={pageSizes}
+                    />
+                </Grid>
             </div>
-        )
+        );
     }
 }

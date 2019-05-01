@@ -1,15 +1,91 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 
+import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
+import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
 import Select from 'react-select';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-
 import api from '../../../services/api';
+import userService from '../../../services/user.service';
 
-export default class RegisterNutrients extends Component {
+const CommandButton = ({
+  onExecute, icon, text, hint, color,
+}) => (
+        <button
+            type="button"
+            className="btn btn-link"
+            style={{ padding: 11 }}
+            onClick={(e) => {
+                onExecute();
+                e.stopPropagation();
+            }}
+            title={hint}
+        >
+            <span className={color || 'undefined'}>
+                {icon ? <i className={`oi oi-${icon}`} style={{ marginRight: text ? 5 : 0 }} /> : null}
+                {text}
+            </span>
+        </button>
+    );
+
+const AddButton = ({ onExecute }) => (
+    <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
+);
+
+const EditButton = ({ onExecute }) => (
+    <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+);
+
+const DeleteButton = ({ onExecute }) => (
+    <CommandButton
+        icon="trash"
+        hint="Delete row"
+        color="text-danger"
+        onExecute={() => {
+            // eslint-disable-next-line
+            if (window.confirm('Are you sure you want to delete this row?')) {
+                onExecute();
+            }
+        }}
+    />
+);
+
+const CommitButton = ({ onExecute }) => (
+    <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+);
+
+const CancelButton = ({ onExecute }) => (
+    <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+);
+
+const commandComponents = {
+    add: AddButton,
+    edit: EditButton,
+    delete: DeleteButton,
+    commit: CommitButton,
+    cancel: CancelButton,
+}
+
+const tableMessages = {
+    noData: 'Sem componentes'
+}
+
+const Command = ({ id, onExecute }) => {
+    const ButtonComponent = commandComponents[id];
+    return (
+        <ButtonComponent
+            onExecute={onExecute}
+        />
+    );
+};
+
+export default class RegisterNutrients extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+
+        this.changeCurrentPage = currentPage => this.setState({ currentPage });
+        this.changePageSize = pageSize => this.setState({ pageSize });
+    }
 
     state = {
         nutrients: [],
@@ -17,7 +93,17 @@ export default class RegisterNutrients extends Component {
         selectedGroup: [],
         components: [],
         loadingComponents: true,
-        qtNutrient: 0
+        qtNutrient: 0,
+        columns: [
+            { name: 'id', title: 'ID geral' },
+            { name: 'id_component', title: 'Componente' },
+            { name: 'id_nutrient', title: 'Nutriente' },
+            { name: 'qt_nutrient', title: 'Quantidade' },
+        ],
+        rows: [],
+        currentPage: 5,
+        pageSize: 5,
+        pageSizes: [5, 10, 0],
     }
 
     fetchComponents = () => {
@@ -50,8 +136,91 @@ export default class RegisterNutrients extends Component {
         });
     }
 
+    renderEditCell = (props) => {
+        const { column } = props;
+
+        if (column.name == 'id_component') {
+            return this.renderLookupComponent();
+        }
+        if (column.name == 'id_nutrient') {
+            return this.renderLookupNutrient();
+        } else if (column.name == 'id') {
+            return <TableEditRow.Row {...props} />;
+        }
+        return <TableEditRow.Cell {...props} width={'350px'} onChange={this.handleChange()} />;
+    }
+
+    renderLookupComponent = () => (
+        <td
+            style={{
+                verticalAlign: 'middle',
+                padding: 1,
+            }}
+        >
+            <div className="mt-3">
+                <Form>
+                    <Form.Group>
+                        <Select
+                            isMulti
+                            isSearchable
+                            isLoading={this.state.loadingComponents}
+                            closeMenuOnSelect={false}
+                            options={this.state.components}
+                            onChange={this.onChangeList}
+                            id="id_component"
+                            name="id_component"
+                            valueKey="id"
+                            labelKey="name"/>
+                    </Form.Group>
+                </Form>
+            </div>
+        </td>
+    );
+
+    renderLookupNutrient = () => (
+        <td
+            style={{
+                verticalAlign: 'middle',
+                padding: 1,
+            }}
+        >
+            <div className="mt-3">
+                <Form>
+                    <Form.Group>
+                        <Select
+                            isMulti
+                            isSearchable
+                            isLoading={this.state.loadingNutrient}
+                            closeMenuOnSelect={false}
+                            options={this.state.nutrients}
+                            onChange={this.onChangeList}
+                            id="id_nutrient"
+                            name="id_nutrient"
+                            valueKey="id"
+                            labelKey="nm_nutrient"/>
+                    </Form.Group>
+                </Form>
+            </div>
+        </td>
+    );
+
     componentDidMount() {
         this.fetchComponents();
+
+        api.get(`/component-nutrient`).then(response => {
+            this.setState({
+                rows: [
+                    ...response.data.map(r => {
+                        return {
+                            id: r.id,
+                            id_component: r.id_component,
+                            id_nutrient: r.id_nutrient,
+                            qt_nutrient: r.qt_nutrient
+                        }
+                    })
+                ]
+            });
+        });
     }
 
     onChangeList = values => {
@@ -67,9 +236,11 @@ export default class RegisterNutrients extends Component {
     }
 
     handleChange = event => {
-        this.setState({
-            [event.target.name]: event.target.value
-        });
+        if (event) {
+            this.setState({
+                [event.target.name]: event.target.value
+            });
+        }
     }
 
     handleSave = () => {
@@ -83,79 +254,56 @@ export default class RegisterNutrients extends Component {
         api.post('/nutrient-component/create', data);
     }
 
+    commitChanges = ({ added, changed, deleted }) => {
+        let { rows } = this.state;
+
+        if (added) {
+            this.handleSave();
+        } else if (changed) {
+            rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
+        } else if (deleted) {
+            const deletedSet = new Set(deleted);
+            rows = rows.filter(row => !deletedSet.has(row.id));
+        }
+        this.setState({ rows });
+    }
+
     render() {
+        const { columns, rows, currentPage, pageSize, pageSizes } = this.state;
+
         return (
-            <div id="register-components" className="mt-3">
-                <Container>
+            <div className="card">
+                <Grid
+                    rows={rows}
+                    columns={columns} >
 
-                    <Row className="d-flex justify-content-center">
-                        <Col md={8}>
-                            <h1>Registro de Nutrientes</h1>
+                    <PagingState
+                        currentPage={currentPage}
+                        onCurrentPageChange={this.changeCurrentPage}
+                        pageSize={pageSize}
+                        onPageSizeChange={this.changePageSize}
+                        defaultCurrentPage={0}
+                        defaultPageSize={5}
+                    />
+                    <EditingState
+                        onCommitChanges={this.commitChanges} />
 
-                            <div className="mt-4">
-                                <Form>
-                                    <label for="id_component">Componente:</label>
-                                    <Form.Group>
-                                        <Select
-                                            isMulti
-                                            isSearchable
-                                            isLoading={this.state.loadingComponents}
-                                            closeMenuOnSelect={false}
-                                            options={this.state.components}
-                                            onChange={this.onChangeList}
-                                            id="id_component"
-                                            name="id_component"
-                                            valueKey="id"
-                                            labelKey="name"
-                                            placeholder="Informe o componente" />
-                                    </Form.Group>
-                                </Form>
-                            </div>
+                    <IntegratedPaging />
 
-                            <div className="mt-4">
-                                <Form>
-                                    <label for="id_nutrient">Nutriente:</label>
-                                    <Form.Group>
-                                        <Select
-                                            isMulti
-                                            isSearchable
-                                            isLoading={this.state.loadingNutrient}
-                                            closeMenuOnSelect={false}
-                                            options={this.state.nutrients}
-                                            onChange={this.onChangeList}
-                                            id="id_nutrient"
-                                            name="id_nutrient"
-                                            valueKey="id"
-                                            labelKey="nm_nutrient"
-                                            placeholder="Informe o nutriente" />
-                                    </Form.Group>
-                                </Form>
-
-                                <Form>
-                                    <label for="qt_nutrient">Descrição:</label>
-                                    <Form.Control
-                                        inline
-                                        type="text-number"
-                                        id="qt_nutrient"
-                                        name="qt_nutrient"
-                                        value={this.state.qtNutrient}
-                                        onChange={this.handleChange}
-                                        placeholder="Quantidade do nutriente"
-                                        required />
-                                </Form>
-                            </div>
-                        </Col>
-                    </Row>
-
-                    <Row className="mt-3 d-flex justify-content-center">
-                        <Col md={8} className="d-flex justify-content-end">
-                            <Button variant="primary" onClick={this.handleSave}>
-                                Salvar
-                            </Button>
-                        </Col>
-                    </Row>
-                </Container>
+                    <Table
+                        messages={tableMessages} />
+                    <TableHeaderRow />
+                    <TableEditRow cellComponent={this.renderEditCell} />
+                    <TableEditColumn
+                        showAddCommand
+                        showEditCommand
+                        showDeleteCommand
+                        commandComponent={Command} />
+                    <PagingPanel
+                        pageSizes={pageSizes}
+                    />
+                </Grid>
             </div>
-        )
+        );
     }
 }
