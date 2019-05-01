@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Select from 'react-select';
+import { Redirect } from 'react-router';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+
+import { Loader } from '../../../../components/loader';
 
 import api from '../../../../services/api';
 import userService from '../../../../services/user.service';
@@ -20,7 +23,9 @@ const mapStateToProps = state => {
 class Periods extends Component {
   state = {
     period: null,
-    weekDays: null
+    weekDays: null,
+    loaderVisible: false,
+    toViewCalendar: false
   }
 
   periodOptions = [
@@ -51,63 +56,80 @@ class Periods extends Component {
   }
 
   handleGenerateCalendar = () => {
-    const data = {
-      nutritionistId: userService.id,
-      patientId: this.props.patientId,
-      meals: this.props.meals,
-      periods: {
-        period: this.state.period,
-        weekDays: [
-          ...this.state.weekDays.map(w => w.value)
-        ]
-      }
-    };
-
-    api.post('/initial-diet/create', data);
+    this.setState({
+      loaderVisible: true
+    }, () => {
+      const data = {
+        nutritionistId: userService.id,
+        patientId: this.props.patientId,
+        meals: this.props.meals,
+        periods: {
+          period: this.state.period,
+          weekDays: [
+            ...this.state.weekDays.map(w => w.value)
+          ]
+        }
+      };
+  
+      api.post('/initial-diet/create', data).then(() => {
+        this.setState({
+          loaderVisible: false,
+          toViewCalendar: true
+        });   
+      });
+    });
   }
 
   render() {
+    if (this.state.toViewCalendar) {
+      return (<Redirect to={`/main/view-calendar/${userService.id}/${this.props.patientId}`} />);
+    }
+
     return (
-      <div id="initial-diet-periods" className="mt-3">
-        <Container>
-          <Row className="d-flex justify-content-center">
-            <Col md={8}>
-              <Form>
-                <Form.Group>
-                  <Form.Label>Período</Form.Label>
-                  <Select
-                    isClearable
-                    name="period"
-                    placeholder="Período"
-                    options={this.periodOptions}
-                    onChange={this.handlePeriodChange} />
-                </Form.Group>
+      <>
+        <div id="initial-diet-periods" className="mt-3">
+          <Container>
+            <Row className="d-flex justify-content-center">
+              <Col md={8}>
+                <Form>
+                  <Form.Group>
+                    <Form.Label>Período</Form.Label>
+                    <Select
+                      isClearable
+                      name="period"
+                      placeholder="Período"
+                      options={this.periodOptions}
+                      onChange={this.handlePeriodChange} />
+                  </Form.Group>
 
-                <Form.Group>
-                  <Form.Label>Dias da semana</Form.Label>
-                  <Select
-                    isMulti
-                    closeMenuOnSelect={false}
-                    name="weekDays"
-                    placeholder="Dias da semana"
-                    options={this.weekDayOptions}
-                    onChange={this.handleWeekDaysChange} />
-                </Form.Group>
-              </Form>
-            </Col>
-          </Row>
+                  <Form.Group>
+                    <Form.Label>Dias da semana</Form.Label>
+                    <Select
+                      isMulti
+                      closeMenuOnSelect={false}
+                      name="weekDays"
+                      placeholder="Dias da semana"
+                      options={this.weekDayOptions}
+                      onChange={this.handleWeekDaysChange} />
+                  </Form.Group>
+                </Form>
+              </Col>
+            </Row>
 
-          <Row className="mt-5 d-flex justify-content-center">
-            <Col md={8} className="d-flex justify-content-end">
-              <Button
-                variant="primary"
-                onClick={this.handleGenerateCalendar}>
-                Gerar calendário
-              </Button>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+            <Row className="mt-5 d-flex justify-content-center">
+              <Col md={8} className="d-flex justify-content-end">
+                <Button
+                  variant="primary"
+                  onClick={this.handleGenerateCalendar}>
+                  Gerar calendário
+                </Button>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+
+        { this.state.loaderVisible && <Loader /> }
+      </>
     )
   }
 }
