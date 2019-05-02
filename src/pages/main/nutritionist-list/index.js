@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 
 import { EditingState } from '@devexpress/dx-react-grid';
-import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, TableColumnVisibility} from '@devexpress/dx-react-grid-bootstrap4';
+import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow } from '@devexpress/dx-react-grid-bootstrap4';
 
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Button from 'react-bootstrap/Button';
@@ -26,17 +26,17 @@ const tableMessages = {
 
 const getRowId = row => row.id;
 
-export default class PatientList extends Component {
+export default class NutritionistList extends Component {
+
   state = {
     columns: [
-      { name: 'nm_patient', title: 'Nome do paciente' },
+      { name: 'nm_nutritionist', title: 'Nome do Nutricionista' },
       { name: 'ds_email', title: 'E-mail' },
       { name: 'actions', title: 'Ações' }
     ],
     editingStateColumnExtensions: [
-      { columnName: 'nm_patient', editingEnabled: false }
+      { columnName: 'nm_nutritionist', editingEnabled: false },
     ],
-    //defaultHiddenColumnNames: ['actions'],
     addedRows: [],
     rows: [],
     toInitialDiet: {
@@ -86,15 +86,15 @@ export default class PatientList extends Component {
     )
   }
 
-  loadPatients = () => {
+  loadNutritionists = () => {
     api.get(`/nutritionist-patient/${userService.id}`).then(response => {
       this.setState({
         rows: [
           ...response.data.map(r => {
             return {
               id: r.id,
-              nm_patient: r.patient.nm_person,
-              ds_email: r.patient.ds_email,
+              nm_nutritionist: r.nutritionist.nm_person,
+              ds_email: r.nutritionist.ds_email,
               actions: this.addActions.call(this, r.patient.id)
             }
           })
@@ -104,7 +104,7 @@ export default class PatientList extends Component {
   }
 
   componentDidMount() {
-    this.loadPatients();
+    this.loadNutritionists();
   }
 
   commitChanges = ({ added, changed, deleted }) => {
@@ -117,17 +117,17 @@ export default class PatientList extends Component {
         nutritionistId: userService.id,
         patientEmail: newPatient.ds_email
       }).then(() => {
-        this.loadPatients();
+        this.loadNutritionists();
       });
     }
 
     if (changed) {
-      rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
+    
     }
 
     if (deleted) {
       api.delete(`/nutritionist-patient/${deleted}`).then(() => {
-        this.loadPatients();
+        this.loadNutritionists();
       });
     }
   }
@@ -141,7 +141,7 @@ export default class PatientList extends Component {
       return (<Redirect to={`/main/initial-diet/${this.state.toInitialDiet.patientId}/diet`} />)
     }
 
-    const { columns, rows, addedRows, editingStateColumnExtensions, defaultHiddenColumnNames } = this.state;
+    const { columns, rows, addedRows, editingStateColumnExtensions } = this.state;
 
     return (
       <div className="card">
@@ -157,9 +157,6 @@ export default class PatientList extends Component {
             onAddedRowsChange={this.changeAddedRows} />
           <Table
             messages={tableMessages} />
-             <TableColumnVisibility
-            defaultHiddenColumnNames={defaultHiddenColumnNames}
-          />
           <TableHeaderRow />
           <TableEditRow />
           <TableEditColumn
