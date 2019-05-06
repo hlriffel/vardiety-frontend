@@ -43,6 +43,9 @@ export default class Header extends Component {
             <LinkContainer to="/main/patient-list">
               <Nav.Link>Lista de pacientes</Nav.Link>
             </LinkContainer>
+            <LinkContainer to="/main/nutritionist-list">
+              <Nav.Link>Lista de nutricionistas</Nav.Link>
+            </LinkContainer>
             <LinkContainer to="/main/about">
               <Nav.Link>Sobre?</Nav.Link>
             </LinkContainer>
