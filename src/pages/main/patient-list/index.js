@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 
 import { EditingState } from '@devexpress/dx-react-grid';
-import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, TableColumnVisibility} from '@devexpress/dx-react-grid-bootstrap4';
+import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, TableColumnVisibility } from '@devexpress/dx-react-grid-bootstrap4';
 
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Button from 'react-bootstrap/Button';
@@ -11,13 +11,66 @@ import Button from 'react-bootstrap/Button';
 import api from '../../../services/api';
 import userService from '../../../services/user.service';
 
-const editColumnMessages = {
-  editCommand: 'Editar',
-  deleteCommand: 'Deletar',
-  addCommand: 'Adicionar',
-  commitCommand: 'Salvar',
-  cancelCommand: 'Cancelar',
-  showDeleteConfirmDialog: true
+const CommandButton = ({
+  onExecute, icon, text, hint, color,
+}) => (
+    <button
+      type="button"
+      className="btn btn-link"
+      style={{ padding: 11 }}
+      onClick={(e) => {
+        onExecute();
+        e.stopPropagation();
+      }}
+      title={hint}
+    >
+      <span className={color || 'undefined'}>
+        {icon ? <i className={`oi oi-${icon}`} style={{ marginRight: text ? 5 : 0 }} /> : null}
+        {text}
+      </span>
+    </button>
+  );
+
+const AddButton = ({ onExecute }) => (
+  <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
+);
+
+const EditButton = ({ onExecute }) => (
+  <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+);
+
+const DeleteButton = ({ onExecute }) => (
+  <CommandButton
+    icon="trash"
+    hint="Delete row"
+    color="text-danger"
+    onExecute={onExecute}
+  />
+);
+
+const CommitButton = ({ onExecute }) => (
+  <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+);
+
+const CancelButton = ({ onExecute }) => (
+  <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+);
+
+const commandComponents = {
+  add: AddButton,
+  edit: EditButton,
+  delete: DeleteButton,
+  commit: CommitButton,
+  cancel: CancelButton,
+};
+
+const Command = ({ id, onExecute }) => {
+  const ButtonComponent = commandComponents[id];
+  return (
+    <ButtonComponent
+      onExecute={onExecute}
+    />
+  );
 };
 
 const tableMessages = {
@@ -80,6 +133,7 @@ export default class PatientList extends Component {
               }
             })
           }}>
+
           Dieta inicial
         </Button>
       </ButtonGroup>
@@ -102,6 +156,15 @@ export default class PatientList extends Component {
       });
     });
   }
+
+  renderEditCell = (props) => {
+    const { column } = props;
+
+    if (column.name == 'actions') {
+      return <TableEditRow.Row {...props} />;
+    }
+    return <TableEditRow.Cell {...props} />;
+  };
 
   componentDidMount() {
     this.loadPatients();
@@ -157,16 +220,16 @@ export default class PatientList extends Component {
             onAddedRowsChange={this.changeAddedRows} />
           <Table
             messages={tableMessages} />
-             <TableColumnVisibility
+          <TableColumnVisibility
             defaultHiddenColumnNames={defaultHiddenColumnNames}
           />
           <TableHeaderRow />
-          <TableEditRow />
+          <TableEditRow cellComponent={this.renderEditCell} />
           <TableEditColumn
             showAddCommand={!addedRows.length}
             showEditCommand
             showDeleteCommand
-            messages={editColumnMessages} />
+            commandComponent={Command} />
         </Grid>
       </div>
     );
