@@ -32,36 +32,26 @@ const CommandButton = ({
   );
 
 const AddButton = ({ onExecute }) => (
-  <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
-);
-
-const EditButton = ({ onExecute }) => (
-  <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+  <CommandButton icon="plus" onExecute={onExecute} />
 );
 
 const DeleteButton = ({ onExecute }) => (
-  <CommandButton
-    icon="trash"
-    hint="Delete row"
-    color="text-danger"
-    onExecute={onExecute}
-  />
+  <CommandButton icon="trash" color="text-danger" onExecute={onExecute} />
 );
 
 const CommitButton = ({ onExecute }) => (
-  <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+  <CommandButton icon="check" color="text-success" onExecute={onExecute} />
 );
 
 const CancelButton = ({ onExecute }) => (
-  <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+  <CommandButton icon="x" color="text-danger" onExecute={onExecute} />
 );
 
 const commandComponents = {
   add: AddButton,
-  edit: EditButton,
   delete: DeleteButton,
   commit: CommitButton,
-  cancel: CancelButton,
+  cancel: CancelButton
 };
 
 const Command = ({ id, onExecute }) => {
@@ -89,7 +79,6 @@ export default class PatientList extends Component {
     editingStateColumnExtensions: [
       { columnName: 'nm_patient', editingEnabled: false }
     ],
-    //defaultHiddenColumnNames: ['actions'],
     addedRows: [],
     rows: [],
     toInitialDiet: {
@@ -160,7 +149,7 @@ export default class PatientList extends Component {
   renderEditCell = (props) => {
     const { column } = props;
 
-    if (column.name == 'actions') {
+    if (column.name === 'actions') {
       return <TableEditRow.Row {...props} />;
     }
     return <TableEditRow.Cell {...props} />;
@@ -170,9 +159,7 @@ export default class PatientList extends Component {
     this.loadPatients();
   }
 
-  commitChanges = ({ added, changed, deleted }) => {
-    let { rows } = this.state;
-
+  commitChanges = ({ added, deleted }) => {
     if (added) {
       const newPatient = added[0];
 
@@ -182,10 +169,6 @@ export default class PatientList extends Component {
       }).then(() => {
         this.loadPatients();
       });
-    }
-
-    if (changed) {
-      rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
     }
 
     if (deleted) {
@@ -227,7 +210,6 @@ export default class PatientList extends Component {
           <TableEditRow cellComponent={this.renderEditCell} />
           <TableEditColumn
             showAddCommand={!addedRows.length}
-            showEditCommand
             showDeleteCommand
             commandComponent={Command} />
         </Grid>

@@ -2,10 +2,11 @@ import * as React from 'react';
 
 import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
 import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
+
 import Select from 'react-select';
 import Form from 'react-bootstrap/Form';
+
 import api from '../../../services/api';
-import userService from '../../../services/user.service';
 
 const CommandButton = ({
   onExecute, icon, text, hint, color,
@@ -28,33 +29,23 @@ const CommandButton = ({
     );
 
 const AddButton = ({ onExecute }) => (
-    <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
+    <CommandButton icon="plus" onExecute={onExecute} />
 );
 
 const EditButton = ({ onExecute }) => (
-    <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+    <CommandButton icon="pencil" color="text-warning" onExecute={onExecute} />
 );
 
 const DeleteButton = ({ onExecute }) => (
-    <CommandButton
-        icon="trash"
-        hint="Delete row"
-        color="text-danger"
-        onExecute={() => {
-            // eslint-disable-next-line
-            if (window.confirm('Are you sure you want to delete this row?')) {
-                onExecute();
-            }
-        }}
-    />
+    <CommandButton icon="trash" color="text-danger" onExecute={onExecute} />
 );
 
 const CommitButton = ({ onExecute }) => (
-    <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+    <CommandButton icon="check" color="text-success" onExecute={onExecute} />
 );
 
 const CancelButton = ({ onExecute }) => (
-    <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+    <CommandButton icon="x" color="text-danger" onExecute={onExecute} />
 );
 
 const commandComponents = {
@@ -62,19 +53,17 @@ const commandComponents = {
     edit: EditButton,
     delete: DeleteButton,
     commit: CommitButton,
-    cancel: CancelButton,
+    cancel: CancelButton
 };
 
 const tableMessages = {
     noData: 'Sem componentes'
-}
+};
 
 const Command = ({ id, onExecute }) => {
     const ButtonComponent = commandComponents[id];
     return (
-        <ButtonComponent
-            onExecute={onExecute}
-        />
+        <ButtonComponent onExecute={onExecute} />
     );
 };
 
