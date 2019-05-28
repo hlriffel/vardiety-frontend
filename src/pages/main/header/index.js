@@ -5,9 +5,10 @@ import Button from 'react-bootstrap/Button';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import Nav from 'react-bootstrap/Nav';
-import FormControl from 'react-bootstrap/FormControl'
 
 import { LinkContainer } from 'react-router-bootstrap';
+
+import userService from '../../../services/user.service';
 
 export default class Header extends Component {
 
@@ -19,9 +20,6 @@ export default class Header extends Component {
             <Navbar.Brand>Vardiety</Navbar.Brand>
           </LinkContainer>
           <Nav className="mr-auto">
-            <LinkContainer to="/main">
-              <Nav.Link>Home</Nav.Link>
-            </LinkContainer>
             <NavDropdown title="Cadastros" bg="primary">
               <NavDropdown.Item>
                 <LinkContainer to="/main/register-restrictions">
@@ -39,20 +37,21 @@ export default class Header extends Component {
               </LinkContainer>  
               </NavDropdown.Item>
             </NavDropdown>
-            { /* Controlar se o usuário logado é nutricionista. Se não for, esconde esse cara */ }
-            <LinkContainer to="/main/patient-list">
-              <Nav.Link>Lista de pacientes</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to="/main/nutritionist-list">
-              <Nav.Link>Lista de nutricionistas</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to="/main/about">
-              <Nav.Link>Sobre?</Nav.Link>
-            </LinkContainer>
+            {
+              userService.userType === 'NUT' &&
+              <LinkContainer to="/main/patient-list">
+                <Nav.Link>Lista de pacientes</Nav.Link>
+              </LinkContainer>
+            }
+            {
+              userService.userType === 'PAT' &&
+              <LinkContainer to="/main/nutritionist-list">
+                <Nav.Link>Lista de nutricionistas</Nav.Link>
+              </LinkContainer>
+            }
           </Nav>
           <Form inline>
-            <FormControl type="text" placeholder="Pesquisa" className="mr-sm-2" />
-            <Button variant="outline-light">Buscar</Button>
+            <Button variant="outline-light">Sair</Button>
           </Form>
         </Navbar>
       </header>
