@@ -112,19 +112,6 @@ export default class NutritionistList extends Component {
           }}>
           Calendário
         </Button>
-
-        <Button
-          variant="outline-primary"
-          onClick={() => {
-            this.setState({
-              toInitialDiet: {
-                state: true,
-                patientId
-              }
-            })
-          }}>
-          Dieta inicial
-        </Button>
       </ButtonGroup>
     )
   }
