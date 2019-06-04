@@ -82,13 +82,9 @@ export default class NutritionistList extends Component {
     ],
     addedRows: [],
     rows: [],
-    toInitialDiet: {
-      state: false,
-      patientId: null
-    },
     toViewCalendar: {
       state: false,
-      patientId: null
+      nutritionistId: null
     }
   }
 
@@ -97,7 +93,7 @@ export default class NutritionistList extends Component {
     this.setState({ addedRows: initialized });
   }
 
-  addActions = patientId => {
+  addActions = nutritionistId => {
     return (
       <ButtonGroup>
         <Button
@@ -106,7 +102,7 @@ export default class NutritionistList extends Component {
             this.setState({
               toViewCalendar: {
                 state: true,
-                patientId
+                nutritionistId
               }
             })
           }}>
@@ -136,7 +132,7 @@ export default class NutritionistList extends Component {
   renderEditCell = (props) => {
     const { column } = props;
 
-    if (column.name == 'actions') {
+    if (column.name === 'actions') {
       return <TableEditRow.Row {...props} />;
     }
     return <TableEditRow.Cell {...props} />;
@@ -168,11 +164,7 @@ export default class NutritionistList extends Component {
 
   render() {
     if (this.state.toViewCalendar.state === true) {
-      return (<Redirect to={`/main/view-calendar/${this.state.toViewCalendar.patientId}`} />)
-    }
-
-    if (this.state.toInitialDiet.state === true) {
-      return (<Redirect to={`/main/initial-diet/${this.state.toInitialDiet.patientId}/diet`} />)
+      return (<Redirect to={`/main/view-calendar/${this.state.toViewCalendar.nutritionistId}/${userService.id}`} />)
     }
 
     const { columns, rows, addedRows, editingStateColumnExtensions } = this.state;
