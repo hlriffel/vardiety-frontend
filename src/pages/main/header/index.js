@@ -46,7 +46,7 @@ export default class Header extends Component {
                 </LinkContainer>
               }
               {
-                userService.userType === 'PAT' &&
+                userService.userType === 'PAC' &&
                 <LinkContainer to="/main/nutritionist-list">
                   <Nav.Link>Lista de nutricionistas</Nav.Link>
                 </LinkContainer>
