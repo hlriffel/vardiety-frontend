@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
 import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
@@ -40,12 +40,7 @@ const DeleteButton = ({ onExecute }) => (
         icon="trash"
         hint="Delete row"
         color="text-danger"
-        onExecute={() => {
-            // eslint-disable-next-line
-            if (window.confirm('Are you sure you want to delete this row?')) {
-                onExecute();
-            }
-        }}
+        onExecute={onExecute}
     />
 );
 
@@ -103,7 +98,7 @@ export default class RegisterNutrients extends React.PureComponent {
         rows: [],
         currentPage: 5,
         pageSize: 5,
-        pageSizes: [5, 10, 0],
+        pageSizes: [5, 10, 30],
     }
 
     fetchComponents = () => {
@@ -170,7 +165,7 @@ export default class RegisterNutrients extends React.PureComponent {
                             id="id_component"
                             name="id_component"
                             valueKey="id"
-                            labelKey="name"/>
+                            labelKey="name" />
                     </Form.Group>
                 </Form>
             </div>
@@ -188,7 +183,6 @@ export default class RegisterNutrients extends React.PureComponent {
                 <Form>
                     <Form.Group>
                         <Select
-                            isMulti
                             isSearchable
                             isLoading={this.state.loadingNutrient}
                             closeMenuOnSelect={false}
@@ -197,7 +191,7 @@ export default class RegisterNutrients extends React.PureComponent {
                             id="id_nutrient"
                             name="id_nutrient"
                             valueKey="id"
-                            labelKey="nm_nutrient"/>
+                            labelKey="nm_nutrient" />
                     </Form.Group>
                 </Form>
             </div>
@@ -207,7 +201,7 @@ export default class RegisterNutrients extends React.PureComponent {
     componentDidMount() {
         this.fetchComponents();
 
-        api.get(`/component-nutrient`).then(response => {
+        api.get(`/component-nutrient/${this.props.location.pathname.substring(this.props.location.pathname.lastIndexOf('/')+1,this.props.location.pathname.length)}`).then(response => {
             this.setState({
                 rows: [
                     ...response.data.map(r => {
@@ -289,11 +283,9 @@ export default class RegisterNutrients extends React.PureComponent {
                         onCommitChanges={this.commitChanges} />
 
                     <IntegratedPaging />
-
                     <Table
                         messages={tableMessages} />
                     <TableHeaderRow />
-                    <TableEditRow cellComponent={this.renderEditCell} />
                     <TableEditColumn
                         showAddCommand
                         showEditCommand

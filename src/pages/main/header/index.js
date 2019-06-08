@@ -25,21 +25,16 @@ export default class Header extends Component {
             <NavDropdown title="Cadastros" bg="primary">
               <NavDropdown.Item>
                 <LinkContainer to="/main/register-restrictions">
-                 <Nav.Link><font color="black">Restrições</font></Nav.Link>
+                  <Nav.Link><font color="black">Restrições</font></Nav.Link>
                 </LinkContainer>
               </NavDropdown.Item>
               <NavDropdown.Item>
-              <LinkContainer to="/main/register-components">
-                <Nav.Link><font color="black">Componentes</font></Nav.Link>
-              </LinkContainer>
-              </NavDropdown.Item>
-              <NavDropdown.Item>
-              <LinkContainer to="/main/register-nutrients">
-                <Nav.Link><font color="black">Nutrientes X Componentes</font></Nav.Link>
-              </LinkContainer>  
+                <LinkContainer to="/main/register-components">
+                  <Nav.Link><font color="black">Componentes</font></Nav.Link>
+                </LinkContainer>
               </NavDropdown.Item>
             </NavDropdown>
-            { /* Controlar se o usuário logado é nutricionista. Se não for, esconde esse cara */ }
+            { /* Controlar se o usuário logado é nutricionista. Se não for, esconde esse cara */}
             <LinkContainer to="/main/patient-list">
               <Nav.Link>Lista de pacientes</Nav.Link>
             </LinkContainer>
@@ -50,10 +45,15 @@ export default class Header extends Component {
               <Nav.Link>Sobre?</Nav.Link>
             </LinkContainer>
           </Nav>
-          <Form inline>
+          { /* <Form inline>
             <FormControl type="text" placeholder="Pesquisa" className="mr-sm-2" />
-            <Button variant="outline-light">Buscar</Button>
-          </Form>
+            <Button variant="outline-light">Buscar</Button> */ }
+            <Nav className="mr-sm-3">
+              <LinkContainer to="/">
+                <Nav.Link>Sair</Nav.Link>
+              </LinkContainer>
+            </Nav>
+          { /*</Form>*/ }
         </Navbar>
       </header>
     );
