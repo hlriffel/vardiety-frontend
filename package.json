@@ -17,6 +17,7 @@
     "react": "^16.8.4",
     "react-bootstrap": "^1.0.0-beta.5",
     "react-dom": "^16.8.4",
+    "react-google-login": "^5.0.4",
     "react-redux": "^6.0.1",
     "react-router": "^5.0.0",
     "react-router-bootstrap": "^0.25.0",
@@ -28,6 +29,7 @@
   },
   "scripts": {
     "local": "set \"REACT_APP_LOCAL=true\" && npm start",
+    "local:linux": "export REACT_APP_LOCAL=true && npm start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
