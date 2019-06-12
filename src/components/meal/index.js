@@ -50,6 +50,10 @@ export class Meal extends Component {
     });
   }
 
+  handleUpdateMeal = () => {
+     //BOA SORTE HENRIQUE :*
+  }
+
   handleSubmit = event => {
     event.preventDefault();
 
@@ -90,6 +94,16 @@ export class Meal extends Component {
                     className="ml-3 oi oi-x"
                     onClick={this.handleMealRemoval} >
                   </span>
+                  
+                  { this.props.iconUpdate &&
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      className="ml-3 oi oi-loop-circular"
+                      onClick={this.handleUpdateMeal} >
+                    </span>
+
+                  }
+
                 </div>
               }
             </div>
