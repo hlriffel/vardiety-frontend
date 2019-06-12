@@ -92,7 +92,7 @@ export default class RegisterComponents extends React.PureComponent {
         columns: [
             { name: 'id', title: 'ID geral' },
             { name: 'nm_component', title: 'Descrição do componente' },
-            { name: 'id_category', title: 'Categoria' },
+            { name: 'nm_category', title: 'Categoria' },
             { name: 'action', title: 'Nutrientes' }
         ],
         rows: [],
@@ -124,7 +124,7 @@ export default class RegisterComponents extends React.PureComponent {
     renderEditCell = (props) => {
         const { column } = props;
 
-        if (column.name == 'id_category') {
+        if (column.name == 'nm_category') {
             return this.renderLookupEditCell();
         } else if (column.name == 'id' || column.name == 'action') {
             return <TableEditRow.Row {...props} />;
@@ -140,7 +140,7 @@ export default class RegisterComponents extends React.PureComponent {
                         return {
                             id: r.id,
                             nm_component: r.nm_component,
-                            id_category: r.id_category,
+                            nm_category: r.category.nm_category,
                             action: this.renderButtonAction.call(this, r.id)
                         }
                     })

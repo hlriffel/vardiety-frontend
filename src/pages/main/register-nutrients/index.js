@@ -28,28 +28,28 @@ const CommandButton = ({
     );
 
 const AddButton = ({ onExecute }) => (
-    <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
+    <CommandButton icon="plus" hint="Criar novo nutriente" onExecute={onExecute} />
 );
 
 const EditButton = ({ onExecute }) => (
-    <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+    <CommandButton icon="pencil" hint="Editar" color="text-warning" onExecute={onExecute} />
 );
 
 const DeleteButton = ({ onExecute }) => (
     <CommandButton
         icon="trash"
-        hint="Delete row"
+        hint="Deletar"
         color="text-danger"
         onExecute={onExecute}
     />
 );
 
 const CommitButton = ({ onExecute }) => (
-    <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+    <CommandButton icon="check" hint="Salvar" color="text-success" onExecute={onExecute} />
 );
 
 const CancelButton = ({ onExecute }) => (
-    <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+    <CommandButton icon="x" hint="Cancelar" color="text-danger" onExecute={onExecute} />
 );
 
 const commandComponents = {
@@ -58,10 +58,10 @@ const commandComponents = {
     delete: DeleteButton,
     commit: CommitButton,
     cancel: CancelButton,
-}
+};
 
 const tableMessages = {
-    noData: 'Sem componentes'
+    noData: 'Sem nutrientes'
 }
 
 const Command = ({ id, onExecute }) => {
@@ -85,20 +85,19 @@ export default class RegisterNutrients extends React.PureComponent {
     state = {
         nutrients: [],
         loadingNutrient: true,
-        selectedGroup: [],
+        selectedGroup: null,
         components: [],
         loadingComponents: true,
         qtNutrient: 0,
         columns: [
             { name: 'id', title: 'ID geral' },
-            { name: 'id_component', title: 'Componente' },
-            { name: 'id_nutrient', title: 'Nutriente' },
+            { name: 'ds_nutrient', title: 'Nutriente' },
             { name: 'qt_nutrient', title: 'Quantidade' },
         ],
         rows: [],
-        currentPage: 5,
-        pageSize: 5,
-        pageSizes: [5, 10, 30],
+        currentPage: 10,
+        pageSize: 10,
+        pageSizes: [10, 30],
     }
 
     fetchComponents = () => {
@@ -115,62 +114,18 @@ export default class RegisterNutrients extends React.PureComponent {
                 loadingNutrient: false
             });
         });
-
-        api.get('/component').then(response => {
-            this.setState({
-                components: [
-                    ...response.data.map(c => {
-                        return {
-                            value: c.id,
-                            label: c.nm_component
-                        }
-                    })
-                ],
-                loadingComponents: false
-            });
-        });
     }
 
     renderEditCell = (props) => {
         const { column } = props;
 
-        if (column.name == 'id_component') {
-            return this.renderLookupComponent();
-        }
-        if (column.name == 'id_nutrient') {
+        if (column.name == 'ds_nutrient') {
             return this.renderLookupNutrient();
         } else if (column.name == 'id') {
             return <TableEditRow.Row {...props} />;
         }
         return <TableEditRow.Cell {...props} width={'350px'} onChange={this.handleChange()} />;
     }
-
-    renderLookupComponent = () => (
-        <td
-            style={{
-                verticalAlign: 'middle',
-                padding: 1,
-            }}
-        >
-            <div className="mt-3">
-                <Form>
-                    <Form.Group>
-                        <Select
-                            isMulti
-                            isSearchable
-                            isLoading={this.state.loadingComponents}
-                            closeMenuOnSelect={false}
-                            options={this.state.components}
-                            onChange={this.onChangeList}
-                            id="id_component"
-                            name="id_component"
-                            valueKey="id"
-                            labelKey="name" />
-                    </Form.Group>
-                </Form>
-            </div>
-        </td>
-    );
 
     renderLookupNutrient = () => (
         <td
@@ -183,11 +138,10 @@ export default class RegisterNutrients extends React.PureComponent {
                 <Form>
                     <Form.Group>
                         <Select
-                            isSearchable
                             isLoading={this.state.loadingNutrient}
                             closeMenuOnSelect={false}
                             options={this.state.nutrients}
-                            onChange={this.onChangeList}
+                            onChange={this.handleChangeListNut}
                             id="id_nutrient"
                             name="id_nutrient"
                             valueKey="id"
@@ -201,14 +155,18 @@ export default class RegisterNutrients extends React.PureComponent {
     componentDidMount() {
         this.fetchComponents();
 
-        api.get(`/component-nutrient/${this.props.location.pathname.substring(this.props.location.pathname.lastIndexOf('/')+1,this.props.location.pathname.length)}`).then(response => {
+        this.loadNutrient();
+    }
+
+    loadNutrient() {
+        api.get(`/component-nutrient/${this.props.match.params.componentId}`).then(response => {
             this.setState({
                 rows: [
                     ...response.data.map(r => {
                         return {
                             id: r.id,
-                            id_component: r.id_component,
-                            id_nutrient: r.id_nutrient,
+                            nm_component: r.component.nm_component,
+                            ds_nutrient: r.nutrient.ds_nutrient,
                             qt_nutrient: r.qt_nutrient
                         }
                     })
@@ -217,49 +175,29 @@ export default class RegisterNutrients extends React.PureComponent {
         });
     }
 
-    onChangeList = values => {
+    handleChangeList = event => {
         this.setState({
-            selectedGroup: [
-                ...values.map(v => {
-                    return {
-                        id: v.value
-                    }
-                })
-            ]
+            selectedGroup: event.value
         });
     }
 
-    handleChange = event => {
-        if (event) {
+    handleChange = value => {
+        if (value) {
             this.setState({
-                [event.target.name]: event.target.value
+                id_component: value
             });
         }
     }
 
-    handleSave = () => {
-
-        const data = {
-            componentId: this.state.loadingNutrient.id,
-            nutrientId: this.state.categories.id,
-            nutrientQuant: this.state.qtNutrient
-        }
-
-        api.post('/nutrient-component/create', data);
-    }
-
     commitChanges = ({ added, changed, deleted }) => {
-        let { rows } = this.state;
 
         if (added) {
-            this.handleSave();
+            /*ToDO */
         } else if (changed) {
-            rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
+            /*ToDO */
         } else if (deleted) {
-            const deletedSet = new Set(deleted);
-            rows = rows.filter(row => !deletedSet.has(row.id));
+            /*ToDO */
         }
-        this.setState({ rows });
     }
 
     render() {
@@ -267,6 +205,9 @@ export default class RegisterNutrients extends React.PureComponent {
 
         return (
             <div className="card">
+
+                <h3>teste</h3>
+
                 <Grid
                     rows={rows}
                     columns={columns} >
@@ -277,7 +218,7 @@ export default class RegisterNutrients extends React.PureComponent {
                         pageSize={pageSize}
                         onPageSizeChange={this.changePageSize}
                         defaultCurrentPage={0}
-                        defaultPageSize={5}
+                        defaultPageSize={10}
                     />
                     <EditingState
                         onCommitChanges={this.commitChanges} />
@@ -286,6 +227,7 @@ export default class RegisterNutrients extends React.PureComponent {
                     <Table
                         messages={tableMessages} />
                     <TableHeaderRow />
+                    <TableEditRow cellComponent={this.renderEditCell} />
                     <TableEditColumn
                         showAddCommand
                         showEditCommand
