@@ -181,7 +181,7 @@ export default class RegisterComponents extends React.PureComponent {
 
             api.post('/component/create', data).then(() => {
                 this.loadComponents();
-            });;
+            });
         } else if (changed) {
             /*ToDO */
         } else if (deleted) {

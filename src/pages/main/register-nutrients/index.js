@@ -89,15 +89,17 @@ export default class RegisterNutrients extends React.PureComponent {
         components: [],
         loadingComponents: true,
         qtNutrient: 0,
+        componentId: null,
         columns: [
             { name: 'id', title: 'ID geral' },
             { name: 'ds_nutrient', title: 'Nutriente' },
-            { name: 'qt_nutrient', title: 'Quantidade' },
+            { name: 'qt_nutrient', title: 'Quantidade' }
         ],
         rows: [],
         currentPage: 10,
         pageSize: 10,
         pageSizes: [10, 30],
+        dsComp: null
     }
 
     fetchComponents = () => {
@@ -124,7 +126,7 @@ export default class RegisterNutrients extends React.PureComponent {
         } else if (column.name == 'id') {
             return <TableEditRow.Row {...props} />;
         }
-        return <TableEditRow.Cell {...props} width={'350px'} onChange={this.handleChange()} />;
+        return <TableEditRow.Cell {...props} width={'350px'} />;
     }
 
     renderLookupNutrient = () => (
@@ -141,7 +143,7 @@ export default class RegisterNutrients extends React.PureComponent {
                             isLoading={this.state.loadingNutrient}
                             closeMenuOnSelect={false}
                             options={this.state.nutrients}
-                            onChange={this.handleChangeListNut}
+                            onChange={this.handleChangeList}
                             id="id_nutrient"
                             name="id_nutrient"
                             valueKey="id"
@@ -160,17 +162,29 @@ export default class RegisterNutrients extends React.PureComponent {
 
     loadNutrient() {
         api.get(`/component-nutrient/${this.props.match.params.componentId}`).then(response => {
+
+            let dsCompData = '';
+
+            let rowData = [
+                ...response.data.map(r => {
+
+                    if (!dsCompData) {
+                        dsCompData = r.component.nm_component;
+                    }
+
+                    return {
+                        id: r.id,
+                        nm_component: r.component.nm_component,
+                        ds_nutrient: r.nutrient.ds_nutrient,
+                        qt_nutrient: r.qt_nutrient
+                    }
+                })
+            ];
+
             this.setState({
-                rows: [
-                    ...response.data.map(r => {
-                        return {
-                            id: r.id,
-                            nm_component: r.component.nm_component,
-                            ds_nutrient: r.nutrient.ds_nutrient,
-                            qt_nutrient: r.qt_nutrient
-                        }
-                    })
-                ]
+                rows: rowData,
+                dsComp: dsCompData,
+                componentId: this.props.match.params.componentId
             });
         });
     }
@@ -181,32 +195,38 @@ export default class RegisterNutrients extends React.PureComponent {
         });
     }
 
-    handleChange = value => {
-        if (value) {
-            this.setState({
-                id_component: value
+    commitChanges = ({ added, changed, deleted }) => {
+
+        if (added) {
+
+            const data = {
+                componentId: this.state.componentId,
+                nutrientId: this.state.selectedGroup,
+                nutrientQuant: added[0].qt_nutrient
+            };
+
+            api.post('/component-nutrient/create', data).then(() => {
+                this.loadNutrient();
+            });
+        } else if (changed) {
+            /*ToDO */
+        } else if (deleted) {
+
+            const idToDelete = this.state.rows[deleted].id;
+
+            api.delete(`/component-nutrient/${idToDelete}`).then(() => {
+                this.loadNutrient();
             });
         }
     }
 
-    commitChanges = ({ added, changed, deleted }) => {
-
-        if (added) {
-            /*ToDO */
-        } else if (changed) {
-            /*ToDO */
-        } else if (deleted) {
-            /*ToDO */
-        }
-    }
-
     render() {
-        const { columns, rows, currentPage, pageSize, pageSizes } = this.state;
+        const { columns, rows, currentPage, pageSize, pageSizes, dsComp} = this.state;
 
         return (
             <div className="card">
 
-                <h3>teste</h3>
+                <h3>{dsComp}</h3>
 
                 <Grid
                     rows={rows}
