@@ -3,11 +3,11 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
 import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
+
 import Select from 'react-select';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import api from '../../../services/api';
-import userService from '../../../services/user.service';
 
 const CommandButton = ({
   onExecute, icon, text, hint, color,
@@ -59,19 +59,17 @@ const commandComponents = {
     edit: EditButton,
     delete: DeleteButton,
     commit: CommitButton,
-    cancel: CancelButton,
+    cancel: CancelButton
 };
 
 const tableMessages = {
     noData: 'Sem componentes'
-}
+};
 
 const Command = ({ id, onExecute }) => {
     const ButtonComponent = commandComponents[id];
     return (
-        <ButtonComponent
-            onExecute={onExecute}
-        />
+        <ButtonComponent onExecute={onExecute} />
     );
 };
 
