@@ -6,7 +6,6 @@ import Button from 'react-bootstrap/Button';
 import { Meal } from '../../../../components/meal';
 
 export class CalendarDay extends Component {
-
   render() {
     return (
       <div id="calendar-day">
@@ -28,7 +27,8 @@ export class CalendarDay extends Component {
                 <div key={meal.id}>
                   <Meal
                     meal={meal}
-                    mealIndex={index} />
+                    mealIndex={index} 
+                    iconUpdate="true"/>
                 </div>
               ))
             }
