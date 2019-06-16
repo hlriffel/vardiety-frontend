@@ -9,6 +9,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 
+import { GoogleLogin } from 'react-google-login';
+
 import api from '../../services/api';
 import userService from '../../services/user.service';
 
@@ -27,20 +29,14 @@ export default class Login extends Component {
 
   submit = event => {
     event.preventDefault();
-    const { history } = this.props;
+
     const login = {
       email: this.state.email,
       password: this.state.password
     };
 
     api.post('/user/login', login).then(res => {
-      this.setState({
-        wrongCombination: false
-      });
-
-      userService.setData(res.data);
-      localStorage.setItem('userData', JSON.stringify(userService.getData()));
-      history.push('/main');
+      this.loginSuccessful(res.data);
     }).catch(err => {
       if (err.response.status === 404) {
         this.setState({
@@ -48,6 +44,33 @@ export default class Login extends Component {
         });
       }
     });
+  }
+
+  loginSuccessful = userData => {
+    const { history } = this.props;
+    this.setState({
+      wrongCombination: false
+    });
+
+    userService.setData(userData);
+    localStorage.setItem('userData', JSON.stringify(userService.getData()));
+    history.push('/main');
+  }
+
+  handleGoogleSuccess = info => {
+    const basicProfile = info.getBasicProfile();
+    const data = {
+      email: basicProfile.getEmail(),
+      name: basicProfile.getName()
+    };
+
+    api.post('/user/google-login', data).then(res => {
+      this.loginSuccessful(res.data);
+    });
+  }
+
+  handleGoogleFailure = info => {
+    console.log(info);
   }
 
   render() {
@@ -81,10 +104,22 @@ export default class Login extends Component {
                 </Button>
               </Form>
 
-              <div id="login-actions" className="d-flex justify-content-between mt-2">
-                <Link to="/register">Cadastrar-se</Link>
-                <div>ou</div>
-                <div>Login com conta Google</div>
+              <div id="login-actions">
+                <div className="d-flex justify-content-center mt-2 mb-2">
+                  <Link to="/register">Cadastrar-se</Link>
+                </div>
+
+                <div className="d-flex justify-content-center mt-2 mb-2">
+                  OU
+                </div>
+                
+                <div className="d-flex justify-content-center mt-2 mb-2">
+                  <GoogleLogin
+                    clientId="790163224963-2urjhk1jn9hj7rk3eica3jva6d67ne35.apps.googleusercontent.com"
+                    buttonText="Entrar com uma conta Google"
+                    onSuccess={this.handleGoogleSuccess}
+                    onFailure={this.handleGoogleFailure} />
+                </div>
               </div>
             </Col>
           </Row>

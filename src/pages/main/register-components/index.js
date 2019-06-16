@@ -232,7 +232,7 @@ export default class RegisterComponents extends React.PureComponent {
                 }}>
 
                 Editar
-                </Button>
+            </Button>
         </div>
     )
 

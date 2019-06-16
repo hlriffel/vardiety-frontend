@@ -32,36 +32,26 @@ const CommandButton = ({
     );
 
 const AddButton = ({ onExecute }) => (
-    <CommandButton icon="plus" hint="Create new row" onExecute={onExecute} />
-);
-
-const EditButton = ({ onExecute }) => (
-    <CommandButton icon="pencil" hint="Edit row" color="text-warning" onExecute={onExecute} />
+    <CommandButton icon="plus" onExecute={onExecute} />
 );
 
 const DeleteButton = ({ onExecute }) => (
-    <CommandButton
-        icon="trash"
-        hint="Delete row"
-        color="text-danger"
-        onExecute={onExecute}
-    />
+    <CommandButton icon="trash" color="text-danger" onExecute={onExecute} />
 );
 
 const CommitButton = ({ onExecute }) => (
-    <CommandButton icon="check" hint="Save changes" color="text-success" onExecute={onExecute} />
+    <CommandButton icon="check" color="text-success" onExecute={onExecute} />
 );
 
 const CancelButton = ({ onExecute }) => (
-    <CommandButton icon="x" hint="Cancel changes" color="text-danger" onExecute={onExecute} />
+    <CommandButton icon="x" color="text-danger" onExecute={onExecute} />
 );
 
 const commandComponents = {
     add: AddButton,
-    edit: EditButton,
     delete: DeleteButton,
     commit: CommitButton,
-    cancel: CancelButton,
+    cancel: CancelButton
 };
 
 const Command = ({ id, onExecute }) => {
@@ -92,13 +82,9 @@ export default class NutritionistList extends Component {
     ],
     addedRows: [],
     rows: [],
-    toInitialDiet: {
-      state: false,
-      patientId: null
-    },
     toViewCalendar: {
       state: false,
-      patientId: null
+      nutritionistId: null
     }
   }
 
@@ -107,7 +93,7 @@ export default class NutritionistList extends Component {
     this.setState({ addedRows: initialized });
   }
 
-  addActions = patientId => {
+  addActions = nutritionistId => {
     return (
       <ButtonGroup>
         <Button
@@ -116,24 +102,11 @@ export default class NutritionistList extends Component {
             this.setState({
               toViewCalendar: {
                 state: true,
-                patientId
+                nutritionistId
               }
             })
           }}>
           Calendário
-        </Button>
-
-        <Button
-          variant="outline-primary"
-          onClick={() => {
-            this.setState({
-              toInitialDiet: {
-                state: true,
-                patientId
-              }
-            })
-          }}>
-          Dieta inicial
         </Button>
       </ButtonGroup>
     )
@@ -159,7 +132,7 @@ export default class NutritionistList extends Component {
   renderEditCell = (props) => {
     const { column } = props;
 
-    if (column.name == 'actions') {
+    if (column.name === 'actions') {
       return <TableEditRow.Row {...props} />;
     }
     return <TableEditRow.Cell {...props} />;
@@ -170,9 +143,7 @@ export default class NutritionistList extends Component {
     this.loadNutritionists();
   }
 
-  commitChanges = ({ added, changed, deleted }) => {
-    let { rows } = this.state;
-
+  commitChanges = ({ added, deleted }) => {
     if (added) {
       const newPatient = added[0];
 
@@ -184,10 +155,6 @@ export default class NutritionistList extends Component {
       });
     }
 
-    if (changed) {
-    
-    }
-
     if (deleted) {
       api.delete(`/nutritionist-patient/${deleted}`).then(() => {
         this.loadNutritionists();
@@ -197,11 +164,7 @@ export default class NutritionistList extends Component {
 
   render() {
     if (this.state.toViewCalendar.state === true) {
-      return (<Redirect to={`/main/view-calendar/${this.state.toViewCalendar.patientId}`} />)
-    }
-
-    if (this.state.toInitialDiet.state === true) {
-      return (<Redirect to={`/main/initial-diet/${this.state.toInitialDiet.patientId}/diet`} />)
+      return (<Redirect to={`/main/view-calendar/${this.state.toViewCalendar.nutritionistId}/${userService.id}`} />)
     }
 
     const { columns, rows, addedRows, editingStateColumnExtensions } = this.state;
@@ -224,7 +187,6 @@ export default class NutritionistList extends Component {
           <TableEditRow  cellComponent={this.renderEditCell} />
           <TableEditColumn
             showAddCommand={!addedRows.length}
-            showEditCommand
             showDeleteCommand
             commandComponent={Command} />
         </Grid>
