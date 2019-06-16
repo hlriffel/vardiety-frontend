@@ -1,11 +1,12 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
+import { Redirect } from 'react-router';
 import { EditingState, PagingState, IntegratedPaging } from '@devexpress/dx-react-grid';
 import { Grid, Table, TableHeaderRow, TableEditColumn, TableEditRow, PagingPanel } from '@devexpress/dx-react-grid-bootstrap4';
 
 import Select from 'react-select';
 import Form from 'react-bootstrap/Form';
-
+import Button from 'react-bootstrap/Button';
 import api from '../../../services/api';
 
 const CommandButton = ({
@@ -29,23 +30,28 @@ const CommandButton = ({
     );
 
 const AddButton = ({ onExecute }) => (
-    <CommandButton icon="plus" onExecute={onExecute} />
+    <CommandButton icon="plus" hint="Criar novo componente" onExecute={onExecute} />
 );
 
 const EditButton = ({ onExecute }) => (
-    <CommandButton icon="pencil" color="text-warning" onExecute={onExecute} />
+    <CommandButton icon="pencil" hint="Editar" color="text-warning" onExecute={onExecute} />
 );
 
 const DeleteButton = ({ onExecute }) => (
-    <CommandButton icon="trash" color="text-danger" onExecute={onExecute} />
+    <CommandButton
+        icon="trash"
+        hint="Deletar"
+        color="text-danger"
+        onExecute={onExecute}
+    />
 );
 
 const CommitButton = ({ onExecute }) => (
-    <CommandButton icon="check" color="text-success" onExecute={onExecute} />
+    <CommandButton icon="check" hint="Salvar" color="text-success" onExecute={onExecute} />
 );
 
 const CancelButton = ({ onExecute }) => (
-    <CommandButton icon="x" color="text-danger" onExecute={onExecute} />
+    <CommandButton icon="x" hint="Cancelar" color="text-danger" onExecute={onExecute} />
 );
 
 const commandComponents = {
@@ -80,19 +86,21 @@ export default class RegisterComponents extends React.PureComponent {
         categories: [],
         loadingCategories: true,
         nmComponent: '',
-        selectedGroup: [],
+        selectedGroup: null,
         columns: [
             { name: 'id', title: 'ID geral' },
             { name: 'nm_component', title: 'Descrição do componente' },
-            {
-                name: 'id_category',
-                title: 'Categoria'
-            }
+            { name: 'nm_category', title: 'Categoria' },
+            { name: 'action', title: 'Nutrientes' }
         ],
         rows: [],
         currentPage: 5,
         pageSize: 5,
-        pageSizes: [5, 10, 0],
+        pageSizes: [5, 10, 30],
+        toNutrientEdition: {
+            state: false,
+            componentId: null
+        }
     };
 
     fetchComponents = () => {
@@ -114,17 +122,15 @@ export default class RegisterComponents extends React.PureComponent {
     renderEditCell = (props) => {
         const { column } = props;
 
-        if (column.name == 'id_category') {
+        if (column.name == 'nm_category') {
             return this.renderLookupEditCell();
-        } else if (column.name == 'id') {
+        } else if (column.name == 'id' || column.name == 'action') {
             return <TableEditRow.Row {...props} />;
         }
-        return <TableEditRow.Cell {...props} width={'350px'} onChange={this.handleChange()} />;
+        return <TableEditRow.Cell {...props} width={'220px'} onChange={this.handleChange()} />;
     };
 
-    componentDidMount() {
-        this.fetchComponents();
-
+    loadComponents() {
         api.get(`/component`).then(response => {
             this.setState({
                 rows: [
@@ -132,12 +138,58 @@ export default class RegisterComponents extends React.PureComponent {
                         return {
                             id: r.id,
                             nm_component: r.nm_component,
-                            id_category: r.id_category
+                            nm_category: r.category.nm_category,
+                            action: this.renderButtonAction.call(this, r.id)
                         }
                     })
                 ]
             });
         });
+    }
+
+    componentDidMount() {
+        this.fetchComponents();
+
+        this.loadComponents();
+    }
+
+    handleChange = value => {
+        if (value) {
+            this.setState({
+                nm_component: value
+            });
+        }
+    }
+
+    handleChangeList = event => {
+        this.setState({
+            selectedGroup: event.value
+        });
+    }
+
+    commitChanges = ({ added, changed, deleted }) => {
+
+        if (added) {
+
+            const newComponent = added[0];
+            const data = {
+                componentName: newComponent.nm_component,
+                categoryId: this.state.selectedGroup
+            };
+
+            api.post('/component/create', data).then(() => {
+                this.loadComponents();
+            });
+        } else if (changed) {
+            /*ToDO */
+        } else if (deleted) {
+
+            const idToDelete = this.state.rows[deleted].id;
+
+            api.delete(`/component/${idToDelete}`).then(() => {
+                this.loadComponents();
+            });
+        }
     }
 
     renderLookupEditCell = () => (
@@ -151,10 +203,8 @@ export default class RegisterComponents extends React.PureComponent {
                 <Form>
                     <Form.Group>
                         <Select
-                            isMulti
                             isSearchable
                             isLoading={this.state.loadingCategories}
-                            closeMenuOnSelect={false}
                             options={this.state.categories}
                             onChange={this.handleChangeList}
                             id="id_category"
@@ -167,51 +217,31 @@ export default class RegisterComponents extends React.PureComponent {
         </td>
     )
 
-    handleChange = value => {
-        if (value) {
-            this.setState({
-                nm_component: value
-            });
-        }
-    }
+    renderButtonAction = (componentId) => (
 
-    handleSave = () => {
+        <div className="mt-0">
+            <Button
+                variant="outline-primary"
+                onClick={() => {
+                    this.setState({
+                        toNutrientEdition: {
+                            state: true,
+                            componentId
+                        }
+                    })
+                }}>
 
-        const data = {
-            componentName: this.state.nmComponent,
-            categoryId: this.state.selectedGroup[0].id
-        }
-
-        api.post('/component/create', data);
-    }
-
-    handleChangeList = values => {
-        this.setState({
-            selectedGroup: [
-                ...values.map(v => {
-                    return {
-                        id: v.value
-                    }
-                })
-            ]
-        });
-    }
-
-    commitChanges = ({ added, changed, deleted }) => {
-        let { rows } = this.state;
-
-        if (added) {
-            this.handleSave();
-        } else if (changed) {
-            rows = rows.map(row => (changed[row.id] ? { ...row, ...changed[row.id] } : row));
-        } else if (deleted) {
-            const deletedSet = new Set(deleted);
-            rows = rows.filter(row => !deletedSet.has(row.id));
-        }
-        this.setState({ rows });
-    }
+                Editar
+            </Button>
+        </div>
+    )
 
     render() {
+
+        if (this.state.toNutrientEdition.state === true) {
+            return (<Redirect to={`/main/register-nutrients/${this.state.toNutrientEdition.componentId}`} />)
+        }
+
         const { columns, rows, currentPage, pageSize, pageSizes } = this.state;
 
         return (
@@ -230,7 +260,6 @@ export default class RegisterComponents extends React.PureComponent {
                     />
                     <EditingState
                         onCommitChanges={this.commitChanges} />
-
                     <IntegratedPaging />
 
                     <Table
